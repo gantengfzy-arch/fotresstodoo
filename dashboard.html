@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortress Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { gray: { 900: '#111827', 800: '#1f2937', 700: '#374151' } } } }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased min-h-screen flex">
+
+    <main id="authSection" class="flex flex-grow items-center justify-center p-6 w-full hidden">
+        <section class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700 text-center">
+            <i class="fa-solid fa-lock text-red-500 text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2">Akses Ditolak</h2>
+            <p class="text-gray-400 mb-6">Sesi anda tidak ditemukan. Anda harus login Kembali.</p>
+            <a href="index.html" class="inline-block w-full bg-emerald-500 hover:bg-emerald-600 py-2 rounded font-bold transition-all">Kembali ke Login</a>
+        </section>
+    </main>
+
+    <div id="dashboardSection" class="hidden w-full flex min-h-screen">
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+            <div class="p-6 flex items-center gap-3 border-b border-gray-700">
+                <i class="fa-solid fa-dragon text-emerald-400 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wider">FORTRESS</h1>
+            </div>
+            <nav class="flex-grow p-4 space-y-2">
+                <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all">
+                    <i class="fa-solid fa-user"></i> Biodata Akun
+                </button>
+                <button onclick="switchTab('jwt')" id="nav-jwt" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400">
+                    <i class="fa-solid fa-key"></i>Token Validator
+                </button>
+                <button onclick="switchTab('crud')" id="nav-crud" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400">
+                    <i class="fa-solid fa-database"></i> Manajemen Catatan
+                </button>
+                <button onclick="openSandbox()" class="w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400 hover:bg-gray-700 hover:text-yellow-400">
+                    <i class="fa-solid fa-flask"></i> Mode Sandbox (Swagger UI)
+                </button>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <button id="btnLogout" class="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-semibold transition-all">
+                    <i class="fa-solid fa-power-off mr-2"></i>Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-8 bg-gray-900 overflow-y-auto">
+
+            <div id="tab-profile" class="tab-content space-y-6">
+                <div class="border-b border-gray-700 pb-4">
+                    <h2 class="text-3xl font-bold text-white">Profil Pengguna</h2>
+                    <p class="text-gray-400">Manajemen data diri dan sesi aktif.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-id-badge mr-2"></i>Info Akun</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div><span class="text-gray-400">Nama</span><p id="profileName" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">Email</span><p id="profileEmail" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">User ID</span><p id="profileId" class="font-mono mt-1 text-white text-xs break-all">-</p></div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-2"></i>Info Sesi</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-400">Status Sesi</span><p class="text-green-400 font-mono mt-1">Device Bound Active</p></div>
+                        <div><span class="text-gray-400">Kunci</span><p id="keyStatus" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">Token Dibuat</span><p id="tokenIssuedAt" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">Token Kadaluarsa</span><p id="tokenExpiry" class="font-mono mt-1 text-white">-</p></div>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 text-sm block mb-1">Token Aktif</span>
+                        <div class="flex items-center gap-2">
+                            <code id="tokenDisplay" class="flex-grow bg-gray-900 px-3 py-2 rounded text-xs font-mono text-gray-400 truncate select-none">••••••••••••••••••••••••••</code>
+                            <button onclick="toggleTokenVisibility()" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded whitespace-nowrap" id="btnToggleToken">
+                                <i class="fa-solid fa-eye mr-1"></i>Lihat
+                            </button>
+                            <button onclick="copyToken()" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded whitespace-nowrap">
+                                <i class="fa-solid fa-copy mr-1"></i>Salin
+                            </button>
+                        </div>
+                        <p class="text-xs text-yellow-600 mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Jangan bagikan token ini ke siapapun!</p>
+                    </div>
+                </div>
+                                <!-- Informasi Akun -->
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-circle-info mr-2"></i>Informasi Akun</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div><span class="text-gray-400">Nama kustom</span><p id="infoCustomName" class="mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">Email utama</span><p id="infoPrimaryEmail" class="mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400">Status email utama</span><p id="infoEmailVerified" class="mt-1 font-mono">-</p></div>
+                        <div><span class="text-gray-400">Email pemulihan</span><p id="infoRecoveryEmail" class="mt-1 text-white">Belum diatur</p></div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-signature mr-2"></i>Nama Kustom</h3>
+                    <div class="flex gap-3">
+                        <input type="text" id="customNameInput" placeholder="Nama tampilan..."
+                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                        <button type="button" onclick="saveCustomName()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold">Simpan</button>
+                    </div>
+                </div>
+    
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-lock mr-2"></i>Ganti Password</h3>
+                    <input type="password" id="oldPassword" placeholder="Password lama"
+                           class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                    <input type="password" id="newPassword" placeholder="Password baru"
+                           class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                    <input type="password" id="newPassword2" placeholder="Ulangi password baru"
+                           class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                    <button type="button" onclick="changePassword()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold">Ubah Password</button>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
+                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-envelope-circle-check mr-2"></i>Email Pemulihan</h3>
+                    <p class="text-sm text-gray-400">Harus verifikasi OTP yang dikirim ke email pemulihan.</p>
+                    <div class="flex gap-3">
+                        <input type="email" id="recoveryEmailInput" placeholder="email.pemulihan@contoh.com"
+                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                        <button type="button" onclick="submitRecoveryEmail()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold whitespace-nowrap">Kirim OTP</button>
+                    </div>
+                    <div class="flex gap-3">
+                        <input type="text" id="recoveryOtpInput" placeholder="Kode OTP 6 digit" maxlength="6"
+                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                        <button type="button" onclick="submitRecoveryOtp()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold">Verifikasi</button>
+                    </div>
+                </div>
+            <br>
+            <div class="bg-gray-800 p-6 rounded-xl border border-red-900 max-w-2xl space-y-3">
+                <h3 class="text-lg font-bold text-red-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Hapus Akun</h3>
+                <p class="text-sm text-gray-400">Akun, semua catatan, sesi, dan data kamu akan dihapus permanen. Tidak bisa dibatalkan!</p>
+                <button type="button" onclick="deleteAccount()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold">
+                    Hapus Akun Saya
+                </button>
+            </div>
+        </div>
+            <div id="tab-jwt" class="tab-content hidden space-y-6">
+                <div class="border-b border-gray-700 pb-4">
+                    <h2 class="text-3xl font-bold text-white">Security & Token Validator</h2>
+                    <p class="text-gray-400">Inspeksi token aktif kamu dan verifikasi token eksternal.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 text-emerald-400"><i class="fa-solid fa-id-badge mr-2"></i>Token Aktif Kamu</h3>
+                        <textarea id="myTokenDisplay" class="w-full h-32 bg-gray-900 border border-gray-600 rounded p-3 text-xs font-mono text-gray-300 break-all resize-none" readonly></textarea>
+                        <button onclick="copyMyToken()" class="mt-3 text-sm text-emerald-400 hover:underline"><i class="fa-solid fa-copy mr-1"></i>Copy Token</button>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 text-blue-400"><i class="fa-solid fa-vial mr-2"></i>Verifikasi Token Lain</h3>
+                        <textarea id="testTokenInput" placeholder="Paste JWT token di sini..." class="w-full h-32 bg-gray-900 border border-gray-600 rounded p-3 text-xs font-mono text-white focus:outline-none focus:border-blue-400 resize-none"></textarea>
+                        <button onclick="verifyTestToken()" class="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold w-full transition-all">Verifikasi</button>
+                        <div id="tokenVerifyResult" class="mt-4 p-3 rounded text-sm hidden font-mono border"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-crud" class="tab-content hidden space-y-6">
+                <div class="border-b border-gray-700 pb-4">
+                    <h2 class="text-3xl font-bold text-white">Manajemen Catatan</h2>
+                    <p class="text-gray-400">Isi catatan sesukamu</p>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <form id="noteForm" class="space-y-4">
+                        <input type="hidden" id="noteEditKey" value="">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Judul / Nama Catatan</label>
+                            <input type="text" id="noteTitle" placeholder="Judul catatan (bisa diubah nanti)..."
+                                   class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Isi Catatan</label>
+                            <textarea id="noteContent" rows="4" placeholder="Tulis apa saja di sini..."
+                                      class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400 resize-y"></textarea>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" id="btnSaveNote" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded font-bold transition-all">
+                                <i class="fa-solid fa-plus mr-2"></i>Simpan Catatan
+                            </button>
+                            <button type="button" id="btnCancelEdit" onclick="cancelEdit()"
+                                    class="hidden bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded font-bold transition-all">
+                                Batal Edit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h3 class="text-base font-bold text-emerald-400 mb-3">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i>Cari Catatan (Kata Kunci)
+                    </h3>
+                    <div class="flex gap-4">
+                        <input type="text" id="searchInput" placeholder="Ketik kata kunci (judul atau isi)..."
+                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-purple-400">
+                        <button onclick="searchByKeyword()" class="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded font-bold transition-all whitespace-nowrap">
+                            Cari
+                        </button>
+                        <button id="btnClearSearch" onclick="clearSearch()"
+                                class="hidden bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded font-bold transition-all">
+                            Reset
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Pencarian di client setelah dekripsi.</p>
+                    <div id="searchResult" class="mt-4 hidden bg-gray-900 rounded-xl border border-gray-700 overflow-hidden"></div>
+                </div>
+
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <div class="px-6 py-3 border-b border-gray-700 flex justify-between items-center">
+                        <h3 class="font-bold text-white">Daftar Catatan</h3>
+                        <span id="noteCount" class="text-sm text-gray-400">0 catatan</span>
+                    </div>
+                    <ul id="noteList" class="divide-y divide-gray-700 max-h-[500px] overflow-y-auto">
+                        <li class="p-6 text-center text-gray-500">Memuat data...</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const KeyStore = {
+            DB_NAME: 'FortressKeyStore',
+            STORE_NAME: 'keys',
+            open() {
+                return new Promise((res, rej) => {
+                    const r = indexedDB.open(this.DB_NAME, 1);
+                    r.onupgradeneeded = e => e.target.result.createObjectStore(this.STORE_NAME);
+                    r.onsuccess = e => res(e.target.result);
+                    r.onerror   = e => rej(e.target.error);
+                });
+            },
+            async get(key) {
+                const db = await this.open();
+                return new Promise((res, rej) => {
+                    const tx  = db.transaction(this.STORE_NAME, 'readonly');
+                    const req = tx.objectStore(this.STORE_NAME).get(key);
+                    req.onsuccess = e => res(e.target.result ?? null);
+                    req.onerror   = e => rej(e.target.error);
+                });
+            },
+            async set(key, value) {
+                const db = await this.open();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(this.STORE_NAME, 'readwrite');
+                    tx.objectStore(this.STORE_NAME).put(value, key);
+                    tx.oncomplete = () => res();
+                    tx.onerror    = e => rej(e.target.error);
+                });
+            },
+            async clear() {
+                for (const k of ['privateKey', 'publicKeyB64', 'notesKey']) {
+                    const db = await this.open();
+                    await new Promise((res, rej) => {
+                        const tx = db.transaction(this.STORE_NAME, 'readwrite');
+                        tx.objectStore(this.STORE_NAME).delete(k);
+                        tx.oncomplete = () => res();
+                        tx.onerror    = e => rej(e.target.error);
+                    });
+                }
+            }
+        };
+
+        function bytesToB64(bytes) {
+            const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+            let s = '';
+            for (let i = 0; i < arr.length; i++) s += String.fromCharCode(arr[i]);
+            return btoa(s);
+        }
+        function b64ToBytes(b64) {
+            const bin = atob(b64);
+            const out = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+            return out;
+        }
+
+        const NotesCrypto = {
+            async getOrCreateKey() {
+                let raw = await KeyStore.get('notesKey');
+                if (!raw) {
+                    const key = await crypto.subtle.generateKey(
+                        { name: 'AES-GCM', length: 256 },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+                    const exported = await crypto.subtle.exportKey('raw', key);
+                    raw = bytesToB64(exported);
+                    await KeyStore.set('notesKey', raw);
+                }
+                return crypto.subtle.importKey(
+                    'raw', b64ToBytes(raw),
+                    { name: 'AES-GCM' },
+                    false,
+                    ['encrypt', 'decrypt']
+                );
+            },
+            async encrypt(plain) {
+                if (plain == null || plain === '') return '';
+                const key = await this.getOrCreateKey();
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encoded = new TextEncoder().encode(String(plain));
+                const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+                const combined = new Uint8Array(iv.length + cipher.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(cipher), iv.length);
+                return bytesToB64(combined);
+            },
+            async decrypt(payload) {
+                if (!payload) return '';
+                try {
+                    const key = await this.getOrCreateKey();
+                    const combined = b64ToBytes(payload);
+                    if (combined.length < 13) return payload;
+                    const iv = combined.slice(0, 12);
+                    const data = combined.slice(12);
+                    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+                    return new TextDecoder().decode(plain);
+                } catch {
+                    return payload;
+                }
+            }
+        };
+
+        const BASE_URL = 'https://gantengfzy-arch-backend.vercel.app/api';
+        let state = { token: null, privateKey: null, publicKeyB64: null };
+        let tokenVisible = false;
+        let refreshTimer = null;
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function parseJwtPayload(token) {
+            try {
+                const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            } catch { return null; }
+        }
+
+        async function buildHmacSignature(method, timestamp) {
+            if (!state.publicKeyB64) return null;
+            const cleanKey = state.publicKeyB64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const keyMaterial = new TextEncoder().encode(`TRUE-E2EE-SECRET-${cleanKey}`);
+            const hmacKey = await crypto.subtle.importKey(
+                'raw', keyMaterial,
+                { name: 'HMAC', hash: 'SHA-256' },
+                false, ['sign']
+            );
+            const data = new TextEncoder().encode(`${method}:${timestamp}`);
+            const sigBuf = await crypto.subtle.sign('HMAC', hmacKey, data);
+            return Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function secureFetch(endpoint, method = 'GET', body = null) {
+            const timestamp = Date.now().toString();
+            const signature = await buildHmacSignature(method, timestamp);
+            const headers = {
+                'Content-Type': 'application/json',
+                'x-timestamp': timestamp,
+            };
+            if (signature)          headers['x-signature'] = signature;
+            if (state.publicKeyB64) headers['x-client-public-key'] = state.publicKeyB64;
+            if (state.token)        headers['Authorization'] = `Bearer ${state.token}`;
+
+            const config = { method, headers };
+            if (body) config.body = JSON.stringify(body);
+
+            const res = await fetch(`${BASE_URL}${endpoint}`, config);
+            const ct = res.headers.get('content-type') || '';
+            let data = null;
+            if (ct.includes('application/json')) {
+                data = await res.json();
+            } else {
+                const text = await res.text();
+                throw new Error(res.status === 404
+                    ? `Endpoint tidak ditemukan (${endpoint})`
+                    : `Server error ${res.status}: ${text.slice(0, 80)}`);
+            }
+
+            if (res.status === 401 || res.status === 403) {
+                Swal.fire('Sesi Ditolak', data?.message || 'Token kadaluarsa. Silakan login ulang.', 'error')
+                    .then(() => handleLogout());
+                throw new Error('Unauthorized');
+            }
+            if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+            return data;
+        }
+
+        function scheduleTokenRefresh(payload) {
+            if (refreshTimer) clearTimeout(refreshTimer);
+            if (!payload?.exp) return;
+            const expiresInMs = (payload.exp * 1000) - Date.now();
+            const refreshInMs = expiresInMs - (5 * 60 * 1000);
+            if (refreshInMs <= 0) doRefreshToken();
+            else {
+                console.log(`Auto-refresh dijadwalkan ${Math.round(refreshInMs / 60000)} menit lagi`);
+                refreshTimer = setTimeout(doRefreshToken, refreshInMs);
+            }
+        }
+
+        async function doRefreshToken() {
+           const rt = localStorage.getItem('refreshToken');
+           if (!rt) return false;
+       
+           try {
+               const res = await fetch(`${BASE_URL}/auth/refresh-token`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({
+                       refreshToken: rt,
+                       clientPublicKey: state.publicKeyB64 
+                   })
+               });
+               const data = await res.json();
+       
+               if (res.ok && data.data?.token) {
+                   state.token = data.data.token;
+                   localStorage.setItem('token', data.data.token);
+                   if (data.data.refreshToken) {
+                       localStorage.setItem('refreshToken', data.data.refreshToken);
+                   }
+                   scheduleTokenRefresh(parseJwtPayload(data.data.token));
+                   return true;
+               }
+           } catch (e) {
+               console.warn('Refresh gagal', e);
+           }
+           return false;
+}
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-gray-700', 'text-emerald-400');
+                el.classList.add('text-gray-400');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const btn = document.getElementById(`nav-${tabId}`);
+            btn.classList.add('bg-gray-700', 'text-emerald-400');
+            btn.classList.remove('text-gray-400');
+            if (tabId === 'profile') loadProfileUI();
+            else if (tabId === 'jwt') document.getElementById('myTokenDisplay').value = state.token || '';
+            else if (tabId === 'crud') fetchNotes();
+        }
+
+        function loadProfileUI() {
+            if (!state.token) return;
+            const p = parseJwtPayload(state.token);
+            let userInfo = {};
+            try { userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}'); } catch {}
+            document.getElementById('profileName').textContent  = userInfo.name  || p?.name  || '(tidak ada)';
+            document.getElementById('profileEmail').textContent = userInfo.email || p?.email || '(tidak ada)';
+            document.getElementById('profileId').textContent    = userInfo.id    || p?.id    || p?.sub || '(tidak ada)';
+            document.getElementById('keyStatus').textContent    = state.privateKey ? 'Aktif (RSA-2048)' : 'Tidak ditemukan';
+            document.getElementById('tokenIssuedAt').textContent = p?.iat ? new Date(p.iat * 1000).toLocaleString('id-ID') : '-';
+            document.getElementById('tokenExpiry').textContent   = p?.exp ? new Date(p.exp * 1000).toLocaleString('id-ID') : 'Tidak terbatas';
+            tokenVisible = false;
+            document.getElementById('tokenDisplay').textContent = '••••••••••••••••••••••••••';
+            document.getElementById('btnToggleToken').innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Lihat';
+        }
+
+        function toggleTokenVisibility() {
+            tokenVisible = !tokenVisible;
+            const display = document.getElementById('tokenDisplay');
+            const btn = document.getElementById('btnToggleToken');
+            if (tokenVisible) {
+                display.textContent = state.token;
+                display.classList.remove('select-none');
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i>Sembunyikan';
+            } else {
+                display.textContent = '••••••••••••••••••••••••••';
+                display.classList.add('select-none');
+                btn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Lihat';
+            }
+        }
+
+        function copyToken() {
+            navigator.clipboard.writeText(state.token || '');
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Token disalin!', showConfirmButton: false, timer: 1500 });
+        }
+        function copyMyToken() {
+            navigator.clipboard.writeText(state.token || '');
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Token dicopy!', showConfirmButton: false, timer: 1500 });
+        }
+
+        function verifyTestToken() {
+            const token = document.getElementById('testTokenInput').value.trim();
+            const resDiv = document.getElementById('tokenVerifyResult');
+            resDiv.className = 'mt-4 p-3 rounded text-sm font-mono border';
+            resDiv.classList.remove('hidden');
+            if (!token) {
+                resDiv.innerHTML = 'Paste token dulu.';
+                resDiv.classList.add('bg-red-900', 'text-red-400', 'border-red-600');
+                return;
+            }
+            const payload = parseJwtPayload(token);
+            if (!payload) {
+                resDiv.innerHTML = 'FORMAT SALAH — Bukan JWT valid!';
+                resDiv.classList.add('bg-red-900', 'text-red-400', 'border-red-600');
+                return;
+            }
+            const expired = payload.exp ? (payload.exp * 1000 < Date.now()) : false;
+            if (expired) {
+                resDiv.innerHTML = `TOKEN EXPIRED!<br>Kadaluarsa: ${new Date(payload.exp * 1000).toLocaleString('id-ID')}`;
+                resDiv.classList.add('bg-red-900', 'text-red-400', 'border-red-600');
+            } else {
+                const expStr = payload.exp ? new Date(payload.exp * 1000).toLocaleString('id-ID') : 'Tidak terbatas';
+                resDiv.innerHTML = `TOKEN VALID & AKTIF<br>Pemilik: ${escapeHtml(payload.email || payload.sub || 'Unknown')}<br>Kadaluarsa: ${expStr}`;
+                resDiv.classList.add('bg-green-900', 'text-green-400', 'border-green-600');
+            }
+        }
+
+        let notesCache = [];
+        const inFlight = new Set();
+
+        function isRateLimited(err) {
+            return /terlalu banyak|too many|429/i.test(err?.message || '');
+        }
+        function handleCrudError(err, fallback) {
+            console.error(err);
+            if (isRateLimited(err)) {
+                Swal.fire('Santai', 'Terlalu banyak request. Tunggu ~1 menit lalu coba lagi.', 'warning');
+                return;
+            }
+            Swal.fire('Error', err.message || fallback, 'error');
+        }
+
+        async function decryptNote(n) {
+            return {
+                ...n,
+                title: await NotesCrypto.decrypt(n.title),
+                description: await NotesCrypto.decrypt(n.description)
+            };
+        }
+
+        async function fetchNotes() {
+            const list = document.getElementById('noteList');
+            const countEl = document.getElementById('noteCount');
+            if (!list) return;
+            list.innerHTML = '<li class="p-6 text-center text-emerald-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Menarik &amp; mendekripsi data...</li>';
+            try {
+                const data = await secureFetch('/todos', 'GET');
+                const raw = data.data || data || [];
+                notesCache = await Promise.all((Array.isArray(raw) ? raw : []).map(decryptNote));
+                renderNotes(notesCache);
+                if (countEl) countEl.textContent = `${notesCache.length} catatan`;
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = `<li class="p-6 text-center text-red-500">${
+                    isRateLimited(err) ? 'Terlalu banyak request. Tunggu sebentar.' : 'Gagal menarik data terenkripsi.'
+                }</li>`;
+                if (countEl) countEl.textContent = '0 catatan';
+            }
+        }
+        const fetchTodos = fetchNotes;
+
+        document.getElementById('noteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('noteTitle');
+            const contentInput = document.getElementById('noteContent');
+            const editKeyInput = document.getElementById('noteEditKey');
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+            const editId = editKeyInput.value.trim();
+            if (!title) {
+                Swal.fire('Peringatan', 'Judul wajib diisi.', 'warning');
+                return;
+            }
+            const actionKey = editId ? `update:${editId}` : 'create';
+            if (inFlight.has(actionKey)) return;
+            inFlight.add(actionKey);
+            try {
+                const encTitle = await NotesCrypto.encrypt(title);
+                const encDesc  = await NotesCrypto.encrypt(content);
+                if (editId) {
+                    await secureFetch(`/todos/${editId}`, 'PUT', { title: encTitle, description: encDesc });
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan diperbarui.', showConfirmButton: false, timer: 1500 });
+                } else {
+                    await secureFetch('/todos', 'POST', { title: encTitle, description: encDesc });
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan disimpan.', showConfirmButton: false, timer: 1500 });
+                }
+                titleInput.value = '';
+                contentInput.value = '';
+                editKeyInput.value = '';
+                document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Simpan Catatan';
+                document.getElementById('btnCancelEdit').classList.add('hidden');
+                await fetchNotes();
+            } catch (err) {
+                handleCrudError(err, editId ? 'Gagal memperbarui catatan' : 'Gagal menyimpan catatan');
+            } finally {
+                inFlight.delete(actionKey);
+            }
+        });
+
+        function startEdit(id) {
+            const note = notesCache.find(n => String(n._id || n.id) === String(id));
+            if (!note) {
+                Swal.fire('Error', 'Catatan tidak ditemukan.', 'error');
+                return;
+            }
+            document.getElementById('noteTitle').value = note.title || '';
+            document.getElementById('noteContent').value = note.description || '';
+            document.getElementById('noteEditKey').value = note._id || note.id || '';
+            document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Update Catatan';
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+            document.getElementById('noteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelEdit() {
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('noteEditKey').value = '';
+            document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Simpan Catatan';
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+        }
+
+        async function deleteNote(id) {
+            if (!id || inFlight.has(`delete:${id}`)) return;
+            const note = notesCache.find(n => String(n._id || n.id) === String(id));
+            const label = note?.title || 'catatan ini';
+            const result = await Swal.fire({
+                title: 'Hapus Catatan?',
+                text: `"${label}" akan dihapus permanen.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#374151',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            });
+            if (!result.isConfirmed) return;
+            inFlight.add(`delete:${id}`);
+            try {
+                await secureFetch(`/todos/${id}`, 'DELETE');
+                notesCache = notesCache.filter(n => String(n._id || n.id) !== String(id));
+                renderNotes(notesCache);
+                const countEl = document.getElementById('noteCount');
+                if (countEl) countEl.textContent = `${notesCache.length} catatan`;
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan dihapus.', showConfirmButton: false, timer: 1500 });
+            } catch (err) {
+                handleCrudError(err, 'Gagal menghapus catatan');
+            } finally {
+                inFlight.delete(`delete:${id}`);
+            }
+        }
+
+        function renderNotes(notes, container = document.getElementById('noteList')) {
+            if (!container) return;
+            container.innerHTML = '';
+            if (!Array.isArray(notes) || notes.length === 0) {
+                container.innerHTML = '<li class="p-6 text-center text-gray-500">Belum ada catatan.</li>';
+                return;
+            }
+            notes.forEach(note => {
+                const id = String(note._id || note.id || '');
+                const safeTitle = escapeHtml(note.title || '');
+                const safeContent = escapeHtml(note.description || '');
+                const preview = safeContent.length > 120 ? safeContent.slice(0, 120) + '…' : safeContent;
+                const li = document.createElement('li');
+                li.className = 'p-4 hover:bg-gray-700/50 transition-colors';
+                li.innerHTML = `
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-semibold text-white truncate">${safeTitle}</h4>
+                            <p class="text-sm text-gray-400 mt-1">${preview || '<em class="text-gray-600">Tanpa isi</em>'}</p>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button data-id="${escapeHtml(id)}" class="btn-edit text-gray-400 hover:text-emerald-400 p-2" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button data-id="${escapeHtml(id)}" class="btn-del text-gray-400 hover:text-red-500 p-2" title="Hapus">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                li.querySelector('.btn-edit').addEventListener('click', () => startEdit(id));
+                li.querySelector('.btn-del').addEventListener('click', () => deleteNote(id));
+                container.appendChild(li);
+            });
+        }
+
+        function searchByKeyword() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultBox = document.getElementById('searchResult');
+            const clearBtn = document.getElementById('btnClearSearch');
+            resultBox.classList.remove('hidden');
+            clearBtn.classList.remove('hidden');
+            if (!keyword) {
+                resultBox.innerHTML = '<div class="p-4 text-center text-red-400">Masukkan kata kunci pencarian.</div>';
+                return;
+            }
+            const found = notesCache.filter(n =>
+                (n.title || '').toLowerCase().includes(keyword) ||
+                (n.description || '').toLowerCase().includes(keyword)
+            );
+            if (found.length === 0) {
+                resultBox.innerHTML = `<div class="p-4 text-center text-gray-400">Tidak ada catatan yang cocok dengan "<strong>${escapeHtml(keyword)}</strong>".</div>`;
+                return;
+            }
+            const ul = document.createElement('ul');
+            ul.className = 'divide-y divide-gray-700';
+            renderNotes(found, ul);
+            resultBox.innerHTML = '';
+            resultBox.appendChild(ul);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResult').classList.add('hidden');
+            document.getElementById('searchResult').innerHTML = '';
+            document.getElementById('btnClearSearch').classList.add('hidden');
+        }
+
+        async function handleLogout() {
+           try {
+               const rt = localStorage.getItem('refreshToken');
+               await fetch(`${BASE_URL}/auth/logout`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ refreshToken: rt })
+               });
+           } catch (_) {}
+           localStorage.clear();
+           
+           const db = await KeyStore.open();
+           await new Promise((res, rej) => {
+               const tx = db.transaction(KeyStore.STORE_NAME, 'readwrite');
+               const store = tx.objectStore(KeyStore.STORE_NAME);
+               store.delete('privateKey');
+               store.delete('publicKeyB64');
+               tx.oncomplete = () => res();
+               tx.onerror = e => rej(e.target.error);
+           });
+           
+           window.location.href = 'index.html';
+           }
+
+
+        document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+        async function renderApp() {
+            const token = localStorage.getItem('token');
+            const privateKey = token ? await KeyStore.get('privateKey') : null;
+            const publicKeyB64 = token ? await KeyStore.get('publicKeyB64') : null;
+            if (!token || !privateKey || !publicKeyB64) {
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('dashboardSection').classList.add('hidden');
+                return;
+            }
+            const payload = parseJwtPayload(token);
+            if (payload?.exp && payload.exp * 1000 < Date.now()) {
+                const rt = localStorage.getItem('refreshToken');
+                if (rt) await doRefreshToken();
+                else { await handleLogout(); return; }
+            }
+            state.token = localStorage.getItem('token');
+            state.privateKey = privateKey;
+            state.publicKeyB64 = publicKeyB64;
+            scheduleTokenRefresh(parseJwtPayload(state.token));
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            switchTab('profile');
+        }
+        async function loadProfileUI() {
+            if (!state.token) return;
+            const p = parseJwtPayload(state.token);
+            let userInfo = {};
+            try { userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}'); } catch {}
+            document.getElementById('profileName').textContent  = userInfo.name  || p?.name  || '(tidak ada)';
+            document.getElementById('profileEmail').textContent = userInfo.email || p?.email || '(tidak ada)';
+            document.getElementById('profileId').textContent    = userInfo.id    || p?.id    || p?.sub || '(tidak ada)';
+            document.getElementById('keyStatus').textContent    = state.privateKey ? 'Aktif' : 'Tidak ditemukan';
+            document.getElementById('tokenIssuedAt').textContent = p?.iat ? new Date(p.iat * 1000).toLocaleString('id-ID') : '-';
+            document.getElementById('tokenExpiry').textContent   = p?.exp ? new Date(p.exp * 1000).toLocaleString('id-ID') : 'Tidak terbatas';
+            tokenVisible = false;
+            document.getElementById('tokenDisplay').textContent = '••••••••••••••••••••••••••';
+            document.getElementById('btnToggleToken').innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Lihat';
+
+            try {
+                const me = await secureFetch('/auth/me', 'GET');
+                const d = me.data || {};
+                if (d.name) {
+                    document.getElementById('profileName').textContent = d.name;
+                    document.getElementById('infoCustomName').textContent = d.name;
+                    document.getElementById('customNameInput').value = d.name;
+                    userInfo.name = d.name;
+                }
+                if (d.email) {
+                    document.getElementById('profileEmail').textContent = d.email;
+                    document.getElementById('infoPrimaryEmail').textContent = d.email;
+                    userInfo.email = d.email;
+                }
+                document.getElementById('infoEmailVerified').textContent = d.isVerified ? 'Terverifikasi' : 'Belum';
+                const rec = document.getElementById('infoRecoveryEmail');
+                if (d.recoveryEmailVerified && d.recoveryEmail) rec.textContent = d.recoveryEmail + ' (aktif)';
+                else if (d.recoveryEmail) rec.textContent = d.recoveryEmail + ' (menunggu OTP)';
+                else rec.textContent = 'Belum diatur';
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            } catch (e) {
+                console.warn('Gagal load /auth/me', e);
+            }
+        }
+
+        async function saveCustomName() {
+            const name = document.getElementById('customNameInput').value.trim();
+            if (!name) return Swal.fire('Peringatan', 'Nama tidak boleh kosong.', 'warning');
+            try {
+                await secureFetch('/auth/profile', 'PUT', { name });
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Nama disimpan', showConfirmButton: false, timer: 1500 });
+                loadProfileUI();
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+        }
+
+        async function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const newPassword2 = document.getElementById('newPassword2').value;
+            if (!oldPassword || !newPassword) return Swal.fire('Peringatan', 'Isi password lama dan baru.', 'warning');
+            if (newPassword !== newPassword2) return Swal.fire('Peringatan', 'Password baru tidak sama.', 'warning');
+            if (newPassword.length < 6) return Swal.fire('Peringatan', 'Password baru minimal 6 karakter.', 'warning');
+            try {
+                await secureFetch('/auth/change-password', 'PUT', { oldPassword, newPassword });
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('newPassword2').value = '';
+                Swal.fire('Berhasil', 'Password diubah.', 'success');
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+        }
+
+        async function submitRecoveryEmail() {
+            const recoveryEmail = document.getElementById('recoveryEmailInput').value.trim();
+            if (!recoveryEmail) return Swal.fire('Peringatan', 'Isi email pemulihan.', 'warning');
+            try {
+                await secureFetch('/auth/recovery-email', 'POST', { recoveryEmail });
+                Swal.fire('OTP terkirim', 'Cek inbox email pemulihan.', 'success');
+                loadProfileUI();
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+        }
+
+        async function submitRecoveryOtp() {
+            const otp = document.getElementById('recoveryOtpInput').value.trim();
+            if (!otp) return Swal.fire('Peringatan', 'Isi OTP.', 'warning');
+            try {
+                await secureFetch('/auth/verify-recovery-otp', 'POST', { otp });
+                document.getElementById('recoveryOtpInput').value = '';
+                Swal.fire('Berhasil', 'Email pemulihan aktif.', 'success');
+                loadProfileUI();
+            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+        }
+        async function deleteAccount() {
+          const { isConfirmed } = await Swal.fire({
+              title: 'Hapus Akun?',
+              html: 'Semua data, catatan, dan sesi akan <strong>dihapus permanen</strong>. Tidak bisa dibatalkan!',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#ef4444',
+              cancelButtonColor: '#374151',
+              confirmButtonText: 'Ya, Hapus Akun Saya!',
+              cancelButtonText: 'Batal'
+          });
+          if (!isConfirmed) return;
+      
+          const { value: password } = await Swal.fire({
+              title: 'Konfirmasi Password',
+              input: 'password',
+              inputPlaceholder: 'Masukkan password kamu',
+              showCancelButton: true,
+              confirmButtonColor: '#ef4444',
+              cancelButtonColor: '#374151',
+              confirmButtonText: 'Hapus Sekarang',
+              cancelButtonText: 'Batal',
+              inputValidator: v => !v ? 'Password wajib diisi!' : null
+          });
+          if (!password) return;
+      
+          try {
+              await secureFetch('/auth/delete-account', 'DELETE', { password });
+              localStorage.clear();
+              const db = await KeyStore.open();
+              await new Promise((res, rej) => {
+                  const tx = db.transaction(KeyStore.STORE_NAME, 'readwrite');
+                  tx.objectStore(KeyStore.STORE_NAME).clear();
+                  tx.oncomplete = () => res();
+                  tx.onerror = e => rej(e.target.error);
+              });
+              await Swal.fire({ icon: 'success', title: 'Akun Dihapus', text: 'Semua data kamu telah dihapus permanen.', timer: 2000, showConfirmButton: false });
+              window.location.href = 'index.html';
+          } catch (err) {
+              Swal.fire('Gagal', err.message || 'Gagal menghapus akun', 'error');
+          }
+}       function openSandbox() {
+    Swal.fire({
+        icon: 'warning',
+        title: '⚠️ Peringatan Sandbox!',
+        html: `
+            <p style="color:#9ca3af;font-size:14px;margin-bottom:12px;">
+                Mode sandbox adalah <strong style="color:#fff">ruang uji publik</strong> — 
+                data yang kamu masukkan bisa dilihat oleh siapa saja.
+            </p>
+            <div style="background:#111827;border:1px solid #374151;border-radius:10px;padding:16px;text-align:left;margin-bottom:12px;">
+            <p style="color:#ef4444;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">🚫 DILARANG</p>
+            <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
+                Masukkan password atau kredensial asli
+            </p>
+            <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
+                Masukkan data pribadi sensitif
+            </p>
+            <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
+                Masukkan informasi rahasia apapun
+            </p>
+        </div>
+        <div style="background:#111827;border:1px solid #065f46;border-radius:10px;padding:16px;text-align:left;">
+            <p style="color:#34d399;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">ℹ️ INFO</p>
+            <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
+                Gunakan hanya untuk uji coba API
+            </p>
+            <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
+                Data sandbox bersifat dummy — tidak nyata, hanya untuk testing
+            </p>
+            <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
+                Mohon gunakan mode sandbox dengan bijak
+            </p>
+        </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Saya Mengerti!',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#374151',
+        cancelButtonText: 'Kembali',
+        background: '#1f2937',
+        color: '#fff'
+    }).then(result => {
+        if (result.isConfirmed) {
+            window.open('https://node-js-backeend.vercel.app/sandbox-docs/#/Sandbox/post_sandbox_exit', '_blank');
+        }
+    });
+}
+        renderApp();
+    </script>
+</body>
+</html>

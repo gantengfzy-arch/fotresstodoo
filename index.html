@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortress - Login</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { gray: { 900: '#111827', 800: '#1f2937' } } } }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        .g-recaptcha {
+            animation: captchaAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        @keyframes captchaAppear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .g-recaptcha:empty {
+            min-height: 78px;
+            background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite, captchaAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased min-h-screen flex flex-col">
+
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-dragon text-emerald-400 text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wider">FORTRESS<span class="text-emerald-400">TODO</span></h1>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex items-center justify-center p-6">
+        <section class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 text-center" id="authTitle">Login</h2>
+            <form id="authForm" class="space-y-4">
+                <div id="nameGroup" class="hidden">
+                    <label class="block text-sm text-gray-400 mb-1">Nama Lengkap</label>
+                    <input type="text" id="name" class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Email</label>
+                    <input type="email" id="email" class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400" required>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Password</label>
+                    <input type="password" id="password" class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400" required>
+                </div>
+                <div class="my-4 flex justify-center">
+                    <div class="g-recaptcha" data-sitekey="6LdfEZ4tAAAAAJXNlHP2NqALUMcdUXaH_q9v9iFV"></div>
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 py-2 rounded font-bold transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="authBtnText">Login</span>
+                </button>
+                <div id="forgotPasswordLink" class="mt-3 text-center">
+                    <a href="#" onclick="showForgotPassword()" class="text-sm text-gray-400 hover:text-emerald-400 transition-all">Lupa Password?</a>
+                </div>
+            </form>
+            <div class="mt-4 text-center text-sm text-gray-400">
+                <span id="authToggleText">Belum punya akun?</span>
+                <a href="#" id="toggleAuth" class="text-emerald-400 hover:underline">Daftar di sini</a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const KeyStore = {
+            DB_NAME: 'FortressKeyStore', STORE_NAME: 'keys',
+            open() {
+                return new Promise((res, rej) => {
+                    const r = indexedDB.open(this.DB_NAME, 1);
+                    r.onupgradeneeded = e => e.target.result.createObjectStore(this.STORE_NAME);
+                    r.onsuccess = e => res(e.target.result);
+                    r.onerror   = e => rej(e.target.error);
+                });
+            },
+            async set(key, value) {
+                const db = await this.open();
+                return new Promise((res, rej) => {
+                    const tx = db.transaction(this.STORE_NAME, 'readwrite');
+                    tx.objectStore(this.STORE_NAME).put(value, key);
+                    tx.oncomplete = () => res();
+                    tx.onerror    = e => rej(e.target.error);
+                });
+            },
+            async get(key) {
+                const db = await this.open();
+                return new Promise((res, rej) => {
+                    const tx  = db.transaction(this.STORE_NAME, 'readonly');
+                    const req = tx.objectStore(this.STORE_NAME).get(key);
+                    req.onsuccess = e => res(e.target.result ?? null);
+                    req.onerror   = e => rej(e.target.error);
+                });
+            },
+            async clear() {
+                for (const k of ['privateKey','publicKeyB64']) {
+                    const db = await this.open();
+                    await new Promise((res, rej) => {
+                        const tx = db.transaction(this.STORE_NAME, 'readwrite');
+                        tx.objectStore(this.STORE_NAME).delete(k);
+                        tx.oncomplete = () => res();
+                        tx.onerror    = e => rej(e.target.error);
+                    });
+                }
+            }
+        };
+
+        const BASE_URL = 'https://gantengfzy-arch-backend.vercel.app/api';
+        let state = { isLoginMode: true };
+        const authForm      = document.getElementById('authForm');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const nameGroup     = document.getElementById('nameGroup');
+
+        function toggleAuthMode() {
+            state.isLoginMode = !state.isLoginMode;
+            document.getElementById('authTitle').innerText      = state.isLoginMode ? 'Login ke Sistem' : 'Registrasi Akun Baru';
+            document.getElementById('authBtnText').innerText    = state.isLoginMode ? 'Login' : 'Daftar Sekarang';
+            document.getElementById('authToggleText').innerText = state.isLoginMode ? 'Belum punya akun?' : 'Sudah punya akun?';
+            document.getElementById('toggleAuth').innerText     = state.isLoginMode ? 'Daftar di sini' : 'Login di sini';
+            if (state.isLoginMode) {
+                nameGroup.classList.add('hidden');
+                document.getElementById('name').removeAttribute('required');
+            } else {
+                nameGroup.classList.remove('hidden');
+                document.getElementById('name').setAttribute('required', 'true');
+            }
+            const forgotLink = document.getElementById('forgotPasswordLink');
+              if (state.isLoginMode) {
+                  forgotLink.classList.remove('hidden');
+              } else {
+                  forgotLink.classList.add('hidden');
+              }
+        }
+        document.getElementById('toggleAuth').addEventListener('click', e => { e.preventDefault(); toggleAuthMode(); });
+
+        async function generateRSAKeys() {
+            const keyPair = await window.crypto.subtle.generateKey(
+                { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1,0,1]), hash: "SHA-256" },
+                true, ["sign","verify"]
+            );
+            const exportedPub  = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+            const publicKeyB64 = btoa(String.fromCharCode(...new Uint8Array(exportedPub)));
+            await KeyStore.set('privateKey',   keyPair.privateKey);
+            await KeyStore.set('publicKeyB64', publicKeyB64);
+            return { privateKey: keyPair.privateKey, publicKeyB64 };
+        }
+
+        async function decryptTokenE2EE(tokenE2EE, publicKeyB64) {
+            const cleanKey    = publicKeyB64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const keyMaterial = new TextEncoder().encode(`TRUE-E2EE-SECRET-${cleanKey}`);
+            const hashBuffer  = await crypto.subtle.digest('SHA-256', keyMaterial);
+            const aesKey      = await crypto.subtle.importKey('raw', hashBuffer, { name: 'AES-GCM' }, false, ['decrypt']);
+            const colonIdx1   = tokenE2EE.indexOf(':');
+            const colonIdx2   = tokenE2EE.indexOf(':', colonIdx1 + 1);
+            if (colonIdx1 === -1 || colonIdx2 === -1) throw new Error('Format token tidak valid');
+            const ivHex         = tokenE2EE.substring(0, colonIdx1);
+            const ciphertextHex = tokenE2EE.substring(colonIdx1 + 1, colonIdx2);
+            const authTagHex    = tokenE2EE.substring(colonIdx2 + 1);
+            const hexToBytes    = hex => new Uint8Array(hex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+            const iv            = hexToBytes(ivHex);
+            const ciphertext    = hexToBytes(ciphertextHex);
+            const authTag       = hexToBytes(authTagHex);
+            const combined      = new Uint8Array(ciphertext.length + authTag.length);
+            combined.set(ciphertext);
+            combined.set(authTag, ciphertext.length);
+            const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aesKey, combined);
+            return new TextDecoder().decode(decrypted);
+        }
+        async function showForgotPassword() {
+         const { value: email } = await Swal.fire({
+             title: '🔑 Lupa Password',
+             html: '<p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Masukkan email yang terdaftar. Kami akan mengirim OTP ke email pemulihan kamu.</p>',
+             input: 'email',
+             inputPlaceholder: 'emailkamu@contoh.com',
+             showCancelButton: true,
+             confirmButtonText: 'Kirim OTP',
+             confirmButtonColor: '#10b981',
+             cancelButtonText: 'Batal',
+             inputValidator: v => !v ? 'Email wajib diisi!' : null
+         });
+     
+         if (!email) return;
+     
+         Swal.showLoading();
+         try {
+             const res  = await fetch(`${BASE_URL}/auth/forgot-password`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ email })
+             });
+             const data = await res.json();
+     
+             if (!res.ok) {
+                 Swal.fire('Gagal', data.message || 'Terjadi kesalahan', 'error');
+                 return;
+             }
+     
+             const { value: formVal } = await Swal.fire({
+                 title: '📧 Cek Email Pemulihan!',
+                 html: `
+                     <p style="font-size:13px;color:#6b7280;margin-bottom:12px;">OTP dikirim ke email pemulihan kamu. Berlaku <strong>2 menit</strong>.</p>
+                     <p style="font-size:12px;color:#f59e0b;margin-bottom:16px;">📬 Tidak ada di inbox? Cek folder <strong>Spam</strong> atau <strong>Promosi</strong>.</p>
+                     <input id="resetOtp" maxlength="6" placeholder="Kode OTP 6 digit"
+                         style="width:100%;padding:10px;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;margin-bottom:10px;font-size:18px;letter-spacing:6px;text-align:center;">
+                     <input id="resetNewPassword" type="password" placeholder="Password baru"
+                         style="width:100%;padding:10px;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;margin-bottom:10px;">
+                     <input id="resetNewPassword2" type="password" placeholder="Ulangi password baru"
+                         style="width:100%;padding:10px;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                 `,
+                 showConfirmButton: true,
+                 confirmButtonText: 'Reset Password',
+                 confirmButtonColor: '#10b981',
+                 showCancelButton: true,
+                 cancelButtonText: 'Batal',
+                 allowOutsideClick: false,
+                 preConfirm: () => {
+                     const otp      = document.getElementById('resetOtp').value.trim();
+                     const pass1    = document.getElementById('resetNewPassword').value;
+                     const pass2    = document.getElementById('resetNewPassword2').value;
+                     if (!otp || otp.length < 6)  { Swal.showValidationMessage('OTP harus 6 digit!'); return false; }
+                     if (!pass1)                  { Swal.showValidationMessage('Password baru wajib diisi!'); return false; }
+                     if (pass1.length < 6)        { Swal.showValidationMessage('Password minimal 6 karakter!'); return false; }
+                     if (pass1 !== pass2)         { Swal.showValidationMessage('Password tidak sama!'); return false; }
+                     return { otp, newPassword: pass1 };
+                 }
+             });
+     
+             if (!formVal) return;
+     
+             Swal.showLoading();
+             const resetRes  = await fetch(`${BASE_URL}/auth/reset-password`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ email, otp: formVal.otp, newPassword: formVal.newPassword })
+             });
+             const resetData = await resetRes.json();
+     
+             if (!resetRes.ok) {
+                 Swal.fire('Gagal', resetData.message || 'OTP salah atau kadaluarsa', 'error');
+                 return;
+             }
+     
+             Swal.fire({ icon: 'success', title: 'Password Berhasil Direset!', text: 'Silakan login dengan password baru kamu.', confirmButtonColor: '#10b981' });
+     
+         } catch (err) {
+             Swal.fire('Error', err.message || 'Gagal terhubung ke server', 'error');
+         }
+     }
+             authForm.addEventListener('submit', async (e) => {
+                 e.preventDefault();
+                 const captchaToken = grecaptcha.getResponse();
+                 if (!captchaToken) {
+                     Swal.fire('Captcha Kosong', 'Centang dulu captcha-nya!', 'warning');
+                     return;
+                 }
+                 const email    = document.getElementById('email').value.trim();
+                 const password = document.getElementById('password').value;
+            const name     = document.getElementById('name').value.trim();
+            const endpoint = state.isLoginMode ? '/auth/login' : '/auth/register';
+
+            authSubmitBtn.disabled = true;
+            Swal.showLoading();
+
+            try {
+                if (state.isLoginMode) {
+                    const { publicKeyB64 } = await generateRSAKeys();
+
+                    const res  = await fetch(`${BASE_URL}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, clientPublicKey: publicKeyB64, captchaToken })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        await KeyStore.clear();
+                        grecaptcha.reset();
+                        Swal.fire('Gagal Login', data.message || 'Email atau password salah', 'error');
+                        return;
+                    }
+
+                    const { tokenE2EE, refreshToken, user } = data.data || data;
+
+                    if (!tokenE2EE) {
+                        await KeyStore.clear();
+                        grecaptcha.reset();
+                        Swal.fire('Error', 'Backend tidak mengembalikan token', 'error');
+                        return;
+                    }
+
+                    const jwtToken = await decryptTokenE2EE(tokenE2EE, publicKeyB64);
+                    localStorage.setItem('token',        jwtToken);
+                    localStorage.setItem('tokenE2EE',    tokenE2EE);
+                    localStorage.setItem('refreshToken', refreshToken || '');
+                    localStorage.setItem('loginAt',      Date.now().toString());
+                    if (user) localStorage.setItem('userInfo', JSON.stringify(user));
+
+                    Swal.fire({ icon: 'success', title: 'Login Berhasil!', text: 'Mengarahkan ke Dashboard...', timer: 1200, showConfirmButton: false })
+                        .then(() => { window.location.href = 'dashboard.html'; });
+
+                } else {
+                    const res  = await fetch(`${BASE_URL}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password, captchaToken })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        if (res.status === 429) {
+                           Swal.fire({
+                               icon: 'error',
+                               title: 'Terlalu Banyak Percobaan!',
+                               text: 'Kamu sudah meminta OTP 3 kali. Silakan tunggu 2 jam sebelum mencoba lagi.',
+                               confirmButtonColor: '#10b981'
+                           });
+                       } else {
+                           Swal.fire('Gagal Daftar', data.message || 'Terjadi kesalahan', 'error');
+                       }
+                       grecaptcha.reset();
+                       return;
+                    
+                    }
+                    grecaptcha.reset();
+
+                    const { value: otp } = await Swal.fire({
+                        title: '📧 Cek Email Kamu!',
+                        html: `
+                            <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Kode OTP 6 digit sudah dikirim ke <strong style="color:#fff">${email}</strong>. Berlaku <strong>2 menit</strong>.</p>
+                            <p style="font-size:12px;color:#f59e0b;margin-bottom:16px;">📬 Tidak ada di inbox? Cek folder <strong>Spam</strong> atau <strong>purchases</strong>.</p>
+                            <div style="display:flex;gap:8px;justify-content:center;">
+                                <input id="otp1" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                                <input id="otp2" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                                <input id="otp3" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                                <input id="otp4" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                                <input id="otp5" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                                <input id="otp6" maxlength="1" style="width:48px;height:56px;text-align:center;font-size:24px;font-weight:bold;border:2px solid #374151;border-radius:8px;background:#111827;color:#fff;outline:none;">
+                            </div>
+                            <p id="otpTimer" style="color:#f87171;font-size:13px;margin-top:12px;">⏳ Sisa waktu: <strong id="otpCountdown">2:00</strong></p>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonText: 'Verifikasi',
+                        confirmButtonColor: '#10b981',
+                        showCancelButton: true,
+                        cancelButtonText: 'Batal',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            const boxes = [1,2,3,4,5,6].map(i => document.getElementById(`otp${i}`));
+                            boxes[0].focus();
+                            boxes.forEach((box, idx) => {
+                                box.addEventListener('input', () => {
+                                    box.value = box.value.replace(/[^0-9]/g, '');
+                                    if (box.value && idx < 5) boxes[idx + 1].focus();
+                                });
+                                box.addEventListener('keydown', e => {
+                                    if (e.key === 'Backspace' && !box.value && idx > 0) boxes[idx - 1].focus();
+                                });
+                                box.addEventListener('focus', () => box.style.borderColor = '#10b981');
+                                box.addEventListener('blur',  () => box.style.borderColor = '#374151');
+                            });
+
+                            let seconds = 120;
+                            const countdown = setInterval(() => {
+                                seconds--;
+                                const m  = Math.floor(seconds / 60);
+                                const s  = seconds % 60;
+                                const el = document.getElementById('otpCountdown');
+                                if (el) el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+                                if (seconds <= 0) {
+                                    clearInterval(countdown);
+                                    const timer = document.getElementById('otpTimer');
+                                    if (timer) timer.innerHTML = '<span style="color:#ef4444">⛔ OTP kadaluarsa! Daftar ulang.</span>';
+                                    Swal.getConfirmButton().disabled = true;
+                                }
+                            }, 1000);
+                        },
+                        preConfirm: async () => {
+                            const boxes  = [1,2,3,4,5,6].map(i => document.getElementById(`otp${i}`));
+                            const otpVal = boxes.map(b => b.value).join('');
+
+                            if (otpVal.length < 6) {
+                                Swal.showValidationMessage('Isi semua 6 digit OTP dulu!');
+                                return false;
+                            }
+
+                            Swal.showLoading();
+                            const verifyRes  = await fetch(`${BASE_URL}/auth/verify-otp`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email, otp: otpVal })
+                            });
+                            const verifyData = await verifyRes.json();
+
+                            if (!verifyRes.ok) {
+                                boxes.forEach(b => b.value = '');
+                                boxes[0].focus();
+                                Swal.showValidationMessage(verifyData.message || 'OTP salah, coba lagi!');
+                                return false;
+                            }
+
+                            return otpVal;
+                        }
+                    });
+
+                    if (!otp) return;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Verifikasi Berhasil! 🎉',
+                        text: 'Akun aktif! Silakan login.',
+                        confirmButtonColor: '#10b981'
+                    });
+                    toggleAuthMode();
+                    grecaptcha.reset();
+                }
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', err.message || 'Gagal terhubung ke server', 'error');
+                grecaptcha.reset();
+            } finally {
+                authSubmitBtn.disabled = false;
+            }
+        });
+
+        (async () => {
+            const token      = localStorage.getItem('token');
+            const privateKey = token ? await KeyStore.get('privateKey') : null;
+            if (token && privateKey) window.location.href = 'dashboard.html';
+        })();
+    </script>
+</body>
+</html>
