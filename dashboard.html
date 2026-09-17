@@ -421,7 +421,7 @@
              );
              await secureFetch(`/todos/${raw._id}`, 'PUT', sealed);
          }
-        const BASE_URL = 'http://localhost:5000/api';
+        const BASE_URL = 'https://gantengfzy-arch-backend.vercel.app/api';
         let state = { token: null, privateKey: null, publicKeyB64: null };
         let tokenVisible = false;
         let refreshTimer = null;
