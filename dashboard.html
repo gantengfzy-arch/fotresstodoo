@@ -14,6 +14,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="i18n.js"></script>
 </head>
 <body class="bg-gray-900 text-white font-sans antialiased min-h-screen flex">
 
@@ -34,20 +35,39 @@
             </div>
             <nav class="flex-grow p-4 space-y-2">
                 <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all">
-                    <i class="fa-solid fa-user"></i> Biodata Akun
+                    <i class="fa-solid fa-user"></i> <span data-i18n="nav.profile">Biodata Akun</span>
                 </button>
                 <button onclick="switchTab('jwt')" id="nav-jwt" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400">
-                    <i class="fa-solid fa-key"></i>Token Validator
+                    <i class="fa-solid fa-key"></i> <span data-i18n="nav.jwt">Token Validator</span>
                 </button>
                 <button onclick="switchTab('crud')" id="nav-crud" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400">
-                    <i class="fa-solid fa-database"></i> Manajemen Catatan
+                    <i class="fa-solid fa-list-check"></i> <span data-i18n="nav.crud">Todos List</span>
+                </button>
+                <button onclick="switchTab('activity')" id="nav-activity" class="nav-btn w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="nav.activity">Activity Log</span>
                 </button>
                 <button onclick="openSandbox()" class="w-full flex items-center gap-3 text-left p-3 rounded-lg transition-all text-gray-400 hover:bg-gray-700 hover:text-yellow-400">
-                    <i class="fa-solid fa-flask"></i> Mode Sandbox (Swagger UI)
+                    <i class="fa-solid fa-flask"></i> <span data-i18n="nav.sandbox">Mode Sandbox (Swagger UI)</span>
                 </button>
             </nav>
+            <div class="px-4 pb-2">
+                <label class="text-xs text-gray-500 block mb-1" data-i18n="lang.label">Bahasa</label>
+                <select id="langSelect" onchange="applyI18n(this.value)"
+                        class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-2 text-sm text-white">
+                    <abbr title="Indonesian"><option value="id" title="Indonesia">Indonesia</option></abbr>
+                    <abbr title="English"><option value="en" title="English">English</option></abbr>
+                    <abbr title="Japan"><option value="ja" title="日本語 (Japanese)">日本語</option></abbr>
+                    <abbr title="Arabic"><option value="ar" title="العربية (Arabic)">العربية</option></abbr>
+                </select>
+                <p class="text-[10px] text-gray-500 mt-1 leading-relaxed">
+                    <abbr title="Indonesia">ID</abbr> ·
+                    <abbr title="English">EN</abbr> ·
+                    <abbr title="Japanese">JA</abbr> ·
+                    <abbr title="Arabic">AR</abbr>
+                </p>
+            </div>
             <div class="p-4 border-t border-gray-700">
-                <button id="btnLogout" class="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-semibold transition-all">
+                <button id="btnLogout" class="w-full bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-semibold transition-all"  data-i18n="nav.logout">
                     <i class="fa-solid fa-power-off mr-2"></i>Logout
                 </button>
             </div>
@@ -57,27 +77,27 @@
 
             <div id="tab-profile" class="tab-content space-y-6">
                 <div class="border-b border-gray-700 pb-4">
-                    <h2 class="text-3xl font-bold text-white">Profil Pengguna</h2>
-                    <p class="text-gray-400">Manajemen data diri dan sesi aktif.</p>
+                    <h2 class="text-3xl font-bold text-white" data-i18n="profile.title">Profil Pengguna</h2>
+                    <p class="text-gray-400" data-i18n="profile.subtitle">Manajemen data diri dan sesi aktif.</p>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-id-badge mr-2"></i>Info Akun</h3>
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.info"><i class="fa-solid fa-id-badge mr-2"></i>Info Akun</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-                        <div><span class="text-gray-400">Nama</span><p id="profileName" class="font-mono mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">Email</span><p id="profileEmail" class="font-mono mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">User ID</span><p id="profileId" class="font-mono mt-1 text-white text-xs break-all">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.name">Nama</span><p id="profileName" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.email">Email</span><p id="profileEmail" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.userid">User ID</span><p id="profileId" class="font-mono mt-1 text-white text-xs break-all">-</p></div>
                     </div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-shield-halved mr-2"></i>Info Sesi</h3>
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.session"><i class="fa-solid fa-shield-halved mr-2"></i>Info Sesi</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-gray-400">Status Sesi</span><p class="text-green-400 font-mono mt-1">Device Bound Active</p></div>
-                        <div><span class="text-gray-400">Kunci</span><p id="keyStatus" class="font-mono mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">Token Dibuat</span><p id="tokenIssuedAt" class="font-mono mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">Token Kadaluarsa</span><p id="tokenExpiry" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.sessionStatus">Status Sesi</span><p class="text-green-400 font-mono mt-1">Device Bound Active</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.key">Kunci</span><p id="keyStatus" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.tokenCreated">Token Dibuat</span><p id="tokenIssuedAt" class="font-mono mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.tokenExpiry">Token Kadaluarsa</span><p id="tokenExpiry" class="font-mono mt-1 text-white">-</p></div>
                     </div>
                     <div>
-                        <span class="text-gray-400 text-sm block mb-1">Token Aktif</span>
+                        <span class="text-gray-400 text-sm block mb-1" data-i18n="profile.tokenActive">Token Aktif</span>
                         <div class="flex items-center gap-2">
                             <code id="tokenDisplay" class="flex-grow bg-gray-900 px-3 py-2 rounded text-xs font-mono text-gray-400 truncate select-none">••••••••••••••••••••••••••</code>
                             <button onclick="toggleTokenVisibility()" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded whitespace-nowrap" id="btnToggleToken">
@@ -87,76 +107,79 @@
                                 <i class="fa-solid fa-copy mr-1"></i>Salin
                             </button>
                         </div>
-                        <p class="text-xs text-yellow-600 mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Jangan bagikan token ini ke siapapun!</p>
+                        <p class="text-xs text-yellow-600 mt-2">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                            <span data-i18n="profile.tokenWarn">Jangan bagikan token ini ke siapapun!</span>
+                        </p>
                     </div>
                 </div>
                                 <!-- Informasi Akun -->
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-4">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-circle-info mr-2"></i>Informasi Akun</h3>
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.accountInfo"><i class="fa-solid fa-circle-info mr-2"></i>Informasi Akun</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-gray-400">Nama kustom</span><p id="infoCustomName" class="mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">Email utama</span><p id="infoPrimaryEmail" class="mt-1 text-white">-</p></div>
-                        <div><span class="text-gray-400">Status email utama</span><p id="infoEmailVerified" class="mt-1 font-mono">-</p></div>
-                        <div><span class="text-gray-400">Email pemulihan</span><p id="infoRecoveryEmail" class="mt-1 text-white">Belum diatur</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.customName">Nama kustom</span><p id="infoCustomName" class="mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.primaryEmail">Email utama</span><p id="infoPrimaryEmail" class="mt-1 text-white">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.emailStatus">Status email utama</span><p id="infoEmailVerified" class="mt-1 font-mono">-</p></div>
+                        <div><span class="text-gray-400" data-i18n="profile.recoveryEmail">Email pemulihan</span><p id="infoRecoveryEmail" class="mt-1 text-white">Belum diatur</p></div>
                     </div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-signature mr-2"></i>Nama Kustom</h3>
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.customName"><i class="fa-solid fa-signature mr-2"></i>Nama Kustom</h3>
                     <div class="flex gap-3">
                         <input type="text" id="customNameInput" placeholder="Nama tampilan..."
                                class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                        <button type="button" onclick="saveCustomName()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold">Simpan</button>
+                        <button type="button" onclick="saveCustomName()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold" data-i18n="profile.saveName">Simpan</button>
                     </div>
                 </div>
     
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-lock mr-2"></i>Ganti Password</h3>
-                    <input type="password" id="oldPassword" placeholder="Password lama"
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.changePass"><i class="fa-solid fa-lock mr-2"></i>Ganti Password</h3>
+                    <input type="password" id="oldPassword" data-i18n-placeholder="profile.oldPass"
                            class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                    <input type="password" id="newPassword" placeholder="Password baru"
+                    <input type="password" id="newPassword" data-i18n-placeholder="profile.newPass" placeholder="Password baru"
                            class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                    <input type="password" id="newPassword2" placeholder="Ulangi password baru"
+                    <input type="password" id="newPassword2" data-i18n-placeholder="profile.newPass2" placeholder="Ulangi password baru"
                            class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                    <button type="button" onclick="changePassword()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold">Ubah Password</button>
+                    <button type="button" onclick="changePassword()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold" data-i18n="profile.changePassBtn">Ubah Password</button>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-2xl space-y-3">
-                    <h3 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-envelope-circle-check mr-2"></i>Email Pemulihan</h3>
-                    <p class="text-sm text-gray-400">Harus verifikasi OTP yang dikirim ke email pemulihan.</p>
+                    <h3 class="text-lg font-bold text-emerald-400" data-i18n="profile.recoveryTitle"><i class="fa-solid fa-envelope-circle-check mr-2"></i>Email Pemulihan</h3>
+                    <p class="text-sm text-gray-400" data-i18n="profile.recoveryHint">Harus verifikasi OTP yang dikirim ke email pemulihan.</p>
                     <div class="flex gap-3">
                         <input type="email" id="recoveryEmailInput" placeholder="email.pemulihan@contoh.com"
                                class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                        <button type="button" onclick="submitRecoveryEmail()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold whitespace-nowrap">Kirim OTP</button>
+                        <button type="button" onclick="submitRecoveryEmail()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold whitespace-nowrap" data-i18n="profile.sendOtp">Kirim OTP</button>
                     </div>
                     <div class="flex gap-3">
                         <input type="text" id="recoveryOtpInput" placeholder="Kode OTP 6 digit" maxlength="6"
                                class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
-                        <button type="button" onclick="submitRecoveryOtp()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold">Verifikasi</button>
+                        <button type="button" onclick="submitRecoveryOtp()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold" data-i18n="profile.verify">Verifikasi</button>
                     </div>
                 </div>
             <br>
             <div class="bg-gray-800 p-6 rounded-xl border border-red-900 max-w-2xl space-y-3">
-                <h3 class="text-lg font-bold text-red-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Hapus Akun</h3>
-                <p class="text-sm text-gray-400">Akun, semua catatan, sesi, dan data kamu akan dihapus permanen. Tidak bisa dibatalkan!</p>
-                <button type="button" onclick="deleteAccount()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold">
+                <h3 class="text-lg font-bold text-red-400" data-i18n="profile.deleteTitle"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Hapus Akun</h3>
+                <p class="text-sm text-gray-400" data-i18n="profile.deleteHint">Akun, semua catatan, sesi, dan data kamu akan dihapus permanen. Tidak bisa dibatalkan!</p>
+                <button type="button" onclick="deleteAccount()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold" data-i18n="profile.deleteBtn">
                     Hapus Akun Saya
                 </button>
             </div>
         </div>
             <div id="tab-jwt" class="tab-content hidden space-y-6">
                 <div class="border-b border-gray-700 pb-4">
-                    <h2 class="text-3xl font-bold text-white">Security & Token Validator</h2>
-                    <p class="text-gray-400">Inspeksi token aktif kamu dan verifikasi token eksternal.</p>
+                    <h2 class="text-3xl font-bold text-white" data-i18n="jwt.title">Token Validator</h2>
+                    <p class="text-gray-400" data-i18n="jwt.subtitle">token aktif kamu dan verifikasi token eksternal.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-lg font-bold mb-4 text-emerald-400"><i class="fa-solid fa-id-badge mr-2"></i>Token Aktif Kamu</h3>
+                        <h3 class="text-lg font-bold mb-4 text-emerald-400" data-i18n="jwt.myToken"><i class="fa-solid fa-id-badge mr-2"></i>Token Aktif Kamu</h3>
                         <textarea id="myTokenDisplay" class="w-full h-32 bg-gray-900 border border-gray-600 rounded p-3 text-xs font-mono text-gray-300 break-all resize-none" readonly></textarea>
-                        <button onclick="copyMyToken()" class="mt-3 text-sm text-emerald-400 hover:underline"><i class="fa-solid fa-copy mr-1"></i>Copy Token</button>
+                        <button onclick="copyMyToken()" class="mt-3 text-sm text-emerald-400 hover:underline" data-i18n="jwt.copy"><i class="fa-solid fa-copy mr-1"></i>Copy Token</button>
                     </div>
                     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                        <h3 class="text-lg font-bold mb-4 text-blue-400"><i class="fa-solid fa-vial mr-2"></i>Verifikasi Token Lain</h3>
+                        <h3 class="text-lg font-bold mb-4 text-blue-400" data-i18n="jwt.verifyOther" data-i18n="jwt.verifyOther"><i class="fa-solid fa-vial mr-2"></i>Verifikasi Token Lain</h3>
                         <textarea id="testTokenInput" placeholder="Paste JWT token di sini..." class="w-full h-32 bg-gray-900 border border-gray-600 rounded p-3 text-xs font-mono text-white focus:outline-none focus:border-blue-400 resize-none"></textarea>
-                        <button onclick="verifyTestToken()" class="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold w-full transition-all">Verifikasi</button>
+                        <button onclick="verifyTestToken()" class="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold w-full transition-all" data-i18n="jwt.verifyBtn">Verifikasi</button>
                         <div id="tokenVerifyResult" class="mt-4 p-3 rounded text-sm hidden font-mono border"></div>
                     </div>
                 </div>
@@ -164,61 +187,107 @@
 
             <div id="tab-crud" class="tab-content hidden space-y-6">
                 <div class="border-b border-gray-700 pb-4">
-                    <h2 class="text-3xl font-bold text-white">Manajemen Catatan</h2>
-                    <p class="text-gray-400">Isi catatan sesukamu</p>
+                    <h2 class="text-3xl font-bold text-white" data-i18n="todo.title">Todos List</h2>
+                    <p class="text-gray-400">Kategori, arsip, pagination, sorting.</p>
                 </div>
-
+            
+                <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 space-y-3">
+                    <h3 class="text-sm font-bold text-emerald-400" data-i18n="todo.manageCat">Kelola Kategori</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="newCategoryName" data-i18n-placeholder="todo.newCat" placeholder="Nama kategori baru..."
+                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm text-white">
+                        <button type="button" onclick="createCategory()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-bold" data-i18n="todo.addCat">Tambah</button>
+                    </div>
+                </div>
+            
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
                     <form id="noteForm" class="space-y-4">
                         <input type="hidden" id="noteEditKey" value="">
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Judul / Nama Catatan</label>
-                            <input type="text" id="noteTitle" placeholder="Judul catatan (bisa diubah nanti)..."
+                            <label class="block text-sm text-gray-400 mb-1" data-i18n="todo.todoTitle">Judul Todo</label>
+                            <input type="text" id="noteTitle" placeholder="Judul tugas..."
                                    class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400" required>
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Isi Catatan</label>
-                            <textarea id="noteContent" rows="4" placeholder="Tulis apa saja di sini..."
+                            <label class="block text-sm text-gray-400 mb-1" data-i18n="todo.desc">Deskripsi</label>
+                            <textarea id="noteContent" rows="3" placeholder="Detail tugas..."
                                       class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-emerald-400 resize-y"></textarea>
                         </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1" data-i18n="todo.category">Kategori</label>
+                            <select id="noteCategory" class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                                <option value="" data-i18n="todo.noCat">Tanpa kategori</option>
+                            </select>
+                        </div>
                         <div class="flex gap-3">
-                            <button type="submit" id="btnSaveNote" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded font-bold transition-all">
-                                <i class="fa-solid fa-plus mr-2"></i>Simpan Catatan
+                            <button type="submit" id="btnSaveNote" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded font-bold" data-i18n="todo.save">
+                                <i class="fa-solid fa-plus mr-2" ></i>Simpan Todo
                             </button>
                             <button type="button" id="btnCancelEdit" onclick="cancelEdit()"
-                                    class="hidden bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded font-bold transition-all">
-                                Batal Edit
-                            </button>
+                                    class="hidden bg-gray-600 hover:bg-gray-500 px-6 py-2 rounded font-bold" data-i18n="todo.cancel">Batal Edit</button>
                         </div>
                     </form>
                 </div>
-
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="text-base font-bold text-emerald-400 mb-3">
-                        <i class="fa-solid fa-magnifying-glass mr-2"></i>Cari Catatan (Kata Kunci)
-                    </h3>
-                    <div class="flex gap-4">
-                        <input type="text" id="searchInput" placeholder="Ketik kata kunci (judul atau isi)..."
-                               class="flex-grow bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-purple-400">
-                        <button onclick="searchByKeyword()" class="bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded font-bold transition-all whitespace-nowrap">
-                            Cari
-                        </button>
-                        <button id="btnClearSearch" onclick="clearSearch()"
-                                class="hidden bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded font-bold transition-all">
-                            Reset
-                        </button>
+            
+                <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="text-xs text-gray-400" data-i18n="todo.sortBy">Sort by</label>
+                        <select id="sortBy" class="block bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
+                            <option value="createdAt">createdAt</option>
+                            <option value="updatedAt">updatedAt</option>
+                            <option value="title">title</option>
+                            <option value="isCompleted">isCompleted</option>
+                            <option value="archived">archived</option>
+                        </select>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Pencarian di client setelah dekripsi.</p>
-                    <div id="searchResult" class="mt-4 hidden bg-gray-900 rounded-xl border border-gray-700 overflow-hidden"></div>
+                    <div>
+                        <label class="text-xs text-gray-400" data-i18n="todo.order">Order</label>
+                        <select id="sortOrder" class="block bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
+                            <option value="desc">desc</option>
+                            <option value="asc">asc</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400" data-i18n="todo.filterArch">Filter arsip</label>
+                        <select id="filterArchived" class="block bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
+                            <option value="" data-i18n="todo.all">Semua</option>
+                            <option value="false" data-i18n="todo.active">Aktif</option>
+                            <option value="true" data-i18n="todo.archived">Arsip</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400" data-i18n="todo.category">Kategori</label>
+                        <select id="filterCategory" class="block bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm">
+                            <option value="" data-i18n="todo.all">Semua</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="todoPage=1; fetchNotes()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded font-bold text-sm" data-i18n="todo.apply">Terapkan</button>
                 </div>
-
+            
                 <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
                     <div class="px-6 py-3 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-white">Daftar Catatan</h3>
-                        <span id="noteCount" class="text-sm text-gray-400">0 catatan</span>
+                        <h3 class="font-bold text-white" data-i18n="todo.list">Daftar Todo</h3>
+                        <span id="noteCount" class="text-sm text-gray-400">0 todo</span>
                     </div>
-                    <ul id="noteList" class="divide-y divide-gray-700 max-h-[500px] overflow-y-auto">
+                    <ul id="noteList" class="divide-y divide-gray-700 max-h-[520px] overflow-y-auto">
                         <li class="p-6 text-center text-gray-500">Memuat data...</li>
+                    </ul>
+                    <div class="px-6 py-3 border-t border-gray-700 flex items-center justify-between gap-3">
+                        <button type="button" onclick="changeTodoPage(-1)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm" data-i18n="todo.prev">Prev</button>
+                        <span id="todoPageInfo" class="text-sm text-gray-400">Halaman 1</span>
+                        <button type="button" onclick="changeTodoPage(1)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm" data-i18n="todo.next">Next</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab-activity" class="tab-content hidden space-y-6">
+                <div class="border-b border-gray-700 pb-4">
+                    <h2 class="text-3xl font-bold text-white" data-i18n="act.title">Activity Log</h2>
+                    <p class="text-gray-400" data-i18n="act.subtitle">Riwayat aksi dari server.</p>
+                </div>
+                <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                    <ul id="activityList" class="divide-y divide-gray-700 max-h-[600px] overflow-y-auto">
+                        <li class="p-6 text-center text-gray-500">Memuat log...</li>
                     </ul>
                 </div>
             </div>
@@ -301,6 +370,7 @@
                     ['encrypt', 'decrypt']
                 );
             },
+            
             async encrypt(plain) {
                 if (plain == null || plain === '') return '';
                 const key = await this.getOrCreateKey();
@@ -328,7 +398,30 @@
             }
         };
 
-        const BASE_URL = 'https://gantengfzy-arch-backend.vercel.app/api';
+        function looksLikeCiphertext(s) {
+             if (typeof s !== 'string' || s.length < 24) return false;
+             return /^[A-Za-z0-9+/]+=*$/.test(s);
+         }
+         
+         async function encryptTodoFields(title, description) {
+             return {
+                 title: await NotesCrypto.encrypt(title || ''),
+                 description: await NotesCrypto.encrypt(description || '')
+             };
+         }
+         
+         async function maybeSealPlainTodo(raw) {
+             if (!raw?._id) return;
+             const titlePlain = raw.title && !looksLikeCiphertext(raw.title);
+             const descPlain  = raw.description && !looksLikeCiphertext(raw.description);
+             if (!titlePlain && !descPlain) return;
+             const sealed = await encryptTodoFields(
+                 titlePlain ? raw.title : await NotesCrypto.decrypt(raw.title),
+                 descPlain  ? (raw.description || '') : await NotesCrypto.decrypt(raw.description || '')
+             );
+             await secureFetch(`/todos/${raw._id}`, 'PUT', sealed);
+         }
+        const BASE_URL = 'http://localhost:5000/api';
         let state = { token: null, privateKey: null, publicKeyB64: null };
         let tokenVisible = false;
         let refreshTimer = null;
@@ -452,7 +545,12 @@
             btn.classList.remove('text-gray-400');
             if (tabId === 'profile') loadProfileUI();
             else if (tabId === 'jwt') document.getElementById('myTokenDisplay').value = state.token || '';
-            else if (tabId === 'crud') fetchNotes();
+            else if (tabId === 'crud') {
+                loadCategories();
+                fetchNotes();
+            } else if (tabId === 'activity') {
+                fetchActivityLog();
+            }
         }
 
         function loadProfileUI() {
@@ -523,232 +621,301 @@
         }
 
         let notesCache = [];
-        const inFlight = new Set();
-
-        function isRateLimited(err) {
-            return /terlalu banyak|too many|429/i.test(err?.message || '');
-        }
-        function handleCrudError(err, fallback) {
-            console.error(err);
-            if (isRateLimited(err)) {
-                Swal.fire('Santai', 'Terlalu banyak request. Tunggu ~1 menit lalu coba lagi.', 'warning');
-                return;
-            }
-            Swal.fire('Error', err.message || fallback, 'error');
-        }
-
-        async function decryptNote(n) {
-            return {
-                ...n,
-                title: await NotesCrypto.decrypt(n.title),
-                description: await NotesCrypto.decrypt(n.description)
-            };
-        }
-
-        async function fetchNotes() {
-            const list = document.getElementById('noteList');
-            const countEl = document.getElementById('noteCount');
-            if (!list) return;
-            list.innerHTML = '<li class="p-6 text-center text-emerald-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Menarik &amp; mendekripsi data...</li>';
+          let categoriesCache = [];
+          let todoPage = 1;
+          let todoLimit = 5;
+          let todoTotalPages = 1;
+          const inFlight = new Set();
+          
+          function isRateLimited(err) {
+              return /terlalu banyak|too many|429/i.test(err?.message || '');
+          }
+          function handleCrudError(err, fallback) {
+              console.error(err);
+              if (isRateLimited(err)) {
+                  Swal.fire('Santai', 'Terlalu banyak request. Tunggu sebentar lalu coba lagi.', 'warning');
+                  return;
+              }
+              Swal.fire('Error', err.message || fallback, 'error');
+          }
+          
+          async function decryptNote(n) {
+              return {
+                  ...n,
+                  title: await NotesCrypto.decrypt(n.title),
+                  description: await NotesCrypto.decrypt(n.description)
+              };
+          }
+          
+          function buildTodoQuery() {
+              const sortBy = document.getElementById('sortBy')?.value || 'createdAt';
+              const order = document.getElementById('sortOrder')?.value || 'desc';
+              const archived = document.getElementById('filterArchived')?.value || '';
+              const category = document.getElementById('filterCategory')?.value || '';
+              const q = new URLSearchParams({ page: String(todoPage), limit: String(todoLimit), sortBy, order });
+              if (archived !== '') q.set('archived', archived);
+              if (category) q.set('category', category);
+              return q.toString();
+          }
+          
+          function changeTodoPage(delta) {
+              const next = todoPage + delta;
+              if (next < 1 || next > todoTotalPages) return;
+              todoPage = next;
+              fetchNotes();
+          }
+          
+          async function loadCategories() {
+             try {
+                 const res = await secureFetch('/categories', 'GET');
+                 const list = res.data || res || [];
+                 categoriesCache = await Promise.all(
+                     (Array.isArray(list) ? list : []).map(async (c) => ({
+                         ...c,
+                         name: await NotesCrypto.decrypt(c.name)
+                     }))
+                 );
+         
+                 const opts = categoriesCache.map(c =>
+                     `<option value="${escapeHtml(String(c._id))}">${escapeHtml(c.name || '')}</option>`
+                 ).join('');
+         
+                 const sel = document.getElementById('noteCategory');
+                 const fil = document.getElementById('filterCategory');
+                 if (sel) sel.innerHTML = '<option value="">Tanpa kategori</option>' + opts;
+                 if (fil) fil.innerHTML = '<option value="">Semua</option>' + opts;
+             } catch (e) {
+                 console.warn('Gagal load kategori', e);
+             }
+}
+          
+          async function createCategory() {
+            const name = document.getElementById('newCategoryName')?.value.trim();
+            if (!name) return Swal.fire('Peringatan', 'Nama kategori wajib.', 'warning');
+        
             try {
-                const data = await secureFetch('/todos', 'GET');
-                const raw = data.data || data || [];
-                notesCache = await Promise.all((Array.isArray(raw) ? raw : []).map(decryptNote));
-                renderNotes(notesCache);
-                if (countEl) countEl.textContent = `${notesCache.length} catatan`;
+                const encryptedName = await NotesCrypto.encrypt(name);
+        
+                await secureFetch('/categories', 'POST', { name: encryptedName });
+                document.getElementById('newCategoryName').value = '';
+                await loadCategories();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Kategori ditambah', showConfirmButton: false, timer: 1200 });
             } catch (err) {
-                console.error(err);
-                list.innerHTML = `<li class="p-6 text-center text-red-500">${
-                    isRateLimited(err) ? 'Terlalu banyak request. Tunggu sebentar.' : 'Gagal menarik data terenkripsi.'
-                }</li>`;
-                if (countEl) countEl.textContent = '0 catatan';
+                Swal.fire('Gagal', err.message, 'error');
             }
-        }
-        const fetchTodos = fetchNotes;
-
-        document.getElementById('noteForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const titleInput = document.getElementById('noteTitle');
-            const contentInput = document.getElementById('noteContent');
-            const editKeyInput = document.getElementById('noteEditKey');
-            const title = titleInput.value.trim();
-            const content = contentInput.value.trim();
-            const editId = editKeyInput.value.trim();
-            if (!title) {
-                Swal.fire('Peringatan', 'Judul wajib diisi.', 'warning');
-                return;
-            }
-            const actionKey = editId ? `update:${editId}` : 'create';
-            if (inFlight.has(actionKey)) return;
-            inFlight.add(actionKey);
-            try {
-                const encTitle = await NotesCrypto.encrypt(title);
-                const encDesc  = await NotesCrypto.encrypt(content);
-                if (editId) {
-                    await secureFetch(`/todos/${editId}`, 'PUT', { title: encTitle, description: encDesc });
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan diperbarui.', showConfirmButton: false, timer: 1500 });
-                } else {
-                    await secureFetch('/todos', 'POST', { title: encTitle, description: encDesc });
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan disimpan.', showConfirmButton: false, timer: 1500 });
-                }
-                titleInput.value = '';
-                contentInput.value = '';
-                editKeyInput.value = '';
-                document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Simpan Catatan';
-                document.getElementById('btnCancelEdit').classList.add('hidden');
-                await fetchNotes();
-            } catch (err) {
-                handleCrudError(err, editId ? 'Gagal memperbarui catatan' : 'Gagal menyimpan catatan');
-            } finally {
-                inFlight.delete(actionKey);
-            }
-        });
-
-        function startEdit(id) {
-            const note = notesCache.find(n => String(n._id || n.id) === String(id));
-            if (!note) {
-                Swal.fire('Error', 'Catatan tidak ditemukan.', 'error');
-                return;
-            }
-            document.getElementById('noteTitle').value = note.title || '';
-            document.getElementById('noteContent').value = note.description || '';
-            document.getElementById('noteEditKey').value = note._id || note.id || '';
-            document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Update Catatan';
-            document.getElementById('btnCancelEdit').classList.remove('hidden');
-            document.getElementById('noteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function cancelEdit() {
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-            document.getElementById('noteEditKey').value = '';
-            document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Simpan Catatan';
-            document.getElementById('btnCancelEdit').classList.add('hidden');
-        }
-
-        async function deleteNote(id) {
-            if (!id || inFlight.has(`delete:${id}`)) return;
-            const note = notesCache.find(n => String(n._id || n.id) === String(id));
-            const label = note?.title || 'catatan ini';
-            const result = await Swal.fire({
-                title: 'Hapus Catatan?',
-                text: `"${label}" akan dihapus permanen.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#374151',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            });
-            if (!result.isConfirmed) return;
-            inFlight.add(`delete:${id}`);
-            try {
-                await secureFetch(`/todos/${id}`, 'DELETE');
-                notesCache = notesCache.filter(n => String(n._id || n.id) !== String(id));
-                renderNotes(notesCache);
-                const countEl = document.getElementById('noteCount');
-                if (countEl) countEl.textContent = `${notesCache.length} catatan`;
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Catatan dihapus.', showConfirmButton: false, timer: 1500 });
-            } catch (err) {
-                handleCrudError(err, 'Gagal menghapus catatan');
-            } finally {
-                inFlight.delete(`delete:${id}`);
-            }
-        }
-
-        function renderNotes(notes, container = document.getElementById('noteList')) {
-            if (!container) return;
-            container.innerHTML = '';
-            if (!Array.isArray(notes) || notes.length === 0) {
-                container.innerHTML = '<li class="p-6 text-center text-gray-500">Belum ada catatan.</li>';
-                return;
-            }
-            notes.forEach(note => {
-                const id = String(note._id || note.id || '');
-                const safeTitle = escapeHtml(note.title || '');
-                const safeContent = escapeHtml(note.description || '');
-                const preview = safeContent.length > 120 ? safeContent.slice(0, 120) + '…' : safeContent;
-                const li = document.createElement('li');
-                li.className = 'p-4 hover:bg-gray-700/50 transition-colors';
-                li.innerHTML = `
-                    <div class="flex justify-between items-start gap-4">
-                        <div class="flex-grow min-w-0">
-                            <h4 class="font-semibold text-white truncate">${safeTitle}</h4>
-                            <p class="text-sm text-gray-400 mt-1">${preview || '<em class="text-gray-600">Tanpa isi</em>'}</p>
-                        </div>
-                        <div class="flex items-center gap-1 flex-shrink-0">
-                            <button data-id="${escapeHtml(id)}" class="btn-edit text-gray-400 hover:text-emerald-400 p-2" title="Edit">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button data-id="${escapeHtml(id)}" class="btn-del text-gray-400 hover:text-red-500 p-2" title="Hapus">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                li.querySelector('.btn-edit').addEventListener('click', () => startEdit(id));
-                li.querySelector('.btn-del').addEventListener('click', () => deleteNote(id));
-                container.appendChild(li);
-            });
-        }
-
-        function searchByKeyword() {
-            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
-            const resultBox = document.getElementById('searchResult');
-            const clearBtn = document.getElementById('btnClearSearch');
-            resultBox.classList.remove('hidden');
-            clearBtn.classList.remove('hidden');
-            if (!keyword) {
-                resultBox.innerHTML = '<div class="p-4 text-center text-red-400">Masukkan kata kunci pencarian.</div>';
-                return;
-            }
-            const found = notesCache.filter(n =>
-                (n.title || '').toLowerCase().includes(keyword) ||
-                (n.description || '').toLowerCase().includes(keyword)
-            );
-            if (found.length === 0) {
-                resultBox.innerHTML = `<div class="p-4 text-center text-gray-400">Tidak ada catatan yang cocok dengan "<strong>${escapeHtml(keyword)}</strong>".</div>`;
-                return;
-            }
-            const ul = document.createElement('ul');
-            ul.className = 'divide-y divide-gray-700';
-            renderNotes(found, ul);
-            resultBox.innerHTML = '';
-            resultBox.appendChild(ul);
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResult').classList.add('hidden');
-            document.getElementById('searchResult').innerHTML = '';
-            document.getElementById('btnClearSearch').classList.add('hidden');
-        }
-
-        async function handleLogout() {
+}
+          
+         async function fetchNotes() {
+           const list = document.getElementById('noteList');
+           const countEl = document.getElementById('noteCount');
+           const pageInfo = document.getElementById('todoPageInfo');
+           if (!list) return;
+           list.innerHTML = '<li class="p-6 text-center text-emerald-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Mendekripsi...</li>';
            try {
-               const rt = localStorage.getItem('refreshToken');
-               await fetch(`${BASE_URL}/auth/logout`, {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ refreshToken: rt })
-               });
-           } catch (_) {}
-           localStorage.clear();
-           
-           const db = await KeyStore.open();
-           await new Promise((res, rej) => {
-               const tx = db.transaction(KeyStore.STORE_NAME, 'readwrite');
-               const store = tx.objectStore(KeyStore.STORE_NAME);
-               store.delete('privateKey');
-               store.delete('publicKeyB64');
-               tx.oncomplete = () => res();
-               tx.onerror = e => rej(e.target.error);
-           });
-           
-           window.location.href = 'index.html';
+               const data = await secureFetch(`/todos?${buildTodoQuery()}`, 'GET');
+               const payload = data.data !== undefined ? data.data : data;
+               const rows = Array.isArray(payload) ? payload : (payload.data || []);
+               todoPage = payload.page || todoPage;
+               todoTotalPages = payload.totalPages || 1;
+               const total = payload.total ?? rows.length;
+       
+               notesCache = await Promise.all((Array.isArray(rows) ? rows : []).map(decryptNote));
+       
+               for (const row of (Array.isArray(rows) ? rows : [])) {
+                   try { await maybeSealPlainTodo(row); } catch (_) {}
+               }
+       
+               renderNotes(notesCache);
+               if (countEl) countEl.textContent = `${total} todo`;
+               if (pageInfo) pageInfo.textContent = `Halaman ${todoPage} / ${todoTotalPages}`;
+           } catch (err) {
+               list.innerHTML = `<li class="p-6 text-center text-red-500">${isRateLimited(err) ? 'Terlalu banyak request.' : (err.message || 'Gagal memuat')}</li>`;
            }
+}
+          const fetchTodos = fetchNotes;
+          
+          document.getElementById('noteForm').addEventListener('submit', async (e) => {
+             e.preventDefault();
+             const title = document.getElementById('noteTitle').value.trim();
+             const content = document.getElementById('noteContent').value.trim();
+             const editId = document.getElementById('noteEditKey').value.trim();
+             const category = document.getElementById('noteCategory')?.value || null;
+         
+             if (!title) return Swal.fire('Peringatan', 'Judul wajib diisi.', 'warning');
+         
+             if (!editId && notesCache.length >= 20) {
+                return Swal.fire(
+                 t('note.limitTitle'),
+                 t('note.limitDesc'),
+                 'warning'
+            );
+             }
+         
+             const actionKey = editId ? `update:${editId}` : 'create';
+             if (inFlight.has(actionKey)) return;
+             inFlight.add(actionKey);
+         
+             try {
+                 const body = {
+                     title: await NotesCrypto.encrypt(title),
+                     description: await NotesCrypto.encrypt(content),
+                     category: category || null
+                 };
+                 if (editId) await secureFetch(`/todos/${editId}`, 'PUT', body);
+                 else await secureFetch('/todos', 'POST', body);
+         
+                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: editId ? 'Todo diperbarui' : 'Todo disimpan', showConfirmButton: false, timer: 1500 });
+                 cancelEdit();
+                 await fetchNotes();
+             } catch (err) {
+                 handleCrudError(err, 'Gagal menyimpan todo');
+             } finally {
+                 inFlight.delete(actionKey);
+             }
+});
+          
+          function startEdit(id) {
+              const note = notesCache.find(n => String(n._id || n.id) === String(id));
+              if (!note) return Swal.fire('Error', 'Todo tidak ditemukan.', 'error');
+              document.getElementById('noteTitle').value = note.title || '';
+              document.getElementById('noteContent').value = note.description || '';
+              document.getElementById('noteEditKey').value = note._id || note.id || '';
+              const catSel = document.getElementById('noteCategory');
+              if (catSel) catSel.value = String(note.category?._id || note.category || '');
+              document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Update Todo';
+              document.getElementById('btnCancelEdit').classList.remove('hidden');
+              document.getElementById('noteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          function cancelEdit() {
+              document.getElementById('noteTitle').value = '';
+              document.getElementById('noteContent').value = '';
+              document.getElementById('noteEditKey').value = '';
+              const catSel = document.getElementById('noteCategory');
+              if (catSel) catSel.value = '';
+              document.getElementById('btnSaveNote').innerHTML = '<i class="fa-solid fa-plus mr-2"></i>Simpan Todo';
+              document.getElementById('btnCancelEdit').classList.add('hidden');
+          }
+          
+          async function deleteNote(id) {
+              if (!id || inFlight.has(`delete:${id}`)) return;
+              const note = notesCache.find(n => String(n._id || n.id) === String(id));
+              const ok = await Swal.fire({
+                  title: 'Hapus Todo?',
+                  text: `"${note?.title || 'todo ini'}" akan dihapus permanen.`,
+                  icon: 'warning', showCancelButton: true,
+                  confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+                  confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
+              });
+              if (!ok.isConfirmed) return;
+              inFlight.add(`delete:${id}`);
+              try {
+                  await secureFetch(`/todos/${id}`, 'DELETE');
+                  await fetchNotes();
+                  Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Todo dihapus', showConfirmButton: false, timer: 1500 });
+              } catch (err) { handleCrudError(err, 'Gagal hapus'); }
+              finally { inFlight.delete(`delete:${id}`); }
+          }
+          
+          async function toggleArchive(id, archived) {
+              try { await secureFetch(`/todos/${id}`, 'PUT', { archived: !archived }); await fetchNotes(); }
+              catch (err) { handleCrudError(err, 'Gagal arsip'); }
+          }
+          async function toggleComplete(id, isCompleted) {
+              try { await secureFetch(`/todos/${id}`, 'PUT', { isCompleted: !isCompleted }); await fetchNotes(); }
+              catch (err) { handleCrudError(err, 'Gagal status'); }
+          }
+          
+          function renderNotes(notes, container = document.getElementById('noteList')) {
+    if (!container) return;
+    container.innerHTML = '';
+    if (!Array.isArray(notes) || !notes.length) {
+        container.innerHTML = '<li class="p-6 text-center text-gray-500">Belum ada todo.</li>';
+        return;
+    }
 
+    let meId = '';
+    try { meId = String(JSON.parse(localStorage.getItem('userInfo') || '{}').id || ''); } catch (_) {}
+    if (!meId) meId = String(parseJwtPayload(state.token)?.id || '');
 
+    notes.forEach(note => {
+        const id = String(note._id || note.id || '');
+        const catName = note.category?.name || (note.category ? String(note.category) : '—');
+        const createdBy = 'Anda';
+        const updatedBy = 'Anda';
+        const createdAt = note.createdAt ? new Date(note.createdAt).toLocaleString('id-ID') : '—';
+        const updatedAt = note.updatedAt ? new Date(note.updatedAt).toLocaleString('id-ID') : '—';
+        const preview = escapeHtml((note.description || '').slice(0, 120));
+
+        const li = document.createElement('li');
+        li.className = 'p-4 hover:bg-gray-700/50 transition-colors';
+        li.innerHTML = `
+            <div class="flex justify-between items-start gap-4">
+                <div class="flex-grow min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-white truncate">${escapeHtml(note.title || '')}</h4>
+                        ${note.isCompleted ? '<span class="text-xs bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded">Selesai</span>' : ''}
+                        ${note.archived ? '<span class="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">Arsip</span>' : ''}
+                        <span class="text-xs bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded">${escapeHtml(String(catName))}</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">${preview || '<em class="text-gray-600">Tanpa deskripsi</em>'}</p>
+                    <p class="text-xs text-gray-500 mt-2">
+                        created_by: ${escapeHtml(createdBy)} · updated_by: ${escapeHtml(updatedBy)}<br>
+                        created_at: ${escapeHtml(createdAt)} · updated_at: ${escapeHtml(updatedAt)} · archived: ${note.archived ? 'true' : 'false'}
+                    </p>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    <button class="btn-done text-gray-400 hover:text-emerald-400 p-2" title="Selesai"><i class="fa-solid fa-check"></i></button>
+                    <button class="btn-arch text-gray-400 hover:text-yellow-400 p-2" title="Arsip"><i class="fa-solid fa-box-archive"></i></button>
+                    <button class="btn-edit text-gray-400 hover:text-blue-400 p-2" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-del text-gray-400 hover:text-red-500 p-2" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>`;
+        li.querySelector('.btn-done').onclick = () => toggleComplete(id, !!note.isCompleted);
+        li.querySelector('.btn-arch').onclick = () => toggleArchive(id, !!note.archived);
+        li.querySelector('.btn-edit').onclick = () => startEdit(id);
+        li.querySelector('.btn-del').onclick = () => deleteNote(id);
+        container.appendChild(li);
+    });
+}
+          
+          async function fetchActivityLog() {
+              const box = document.getElementById('activityList');
+              if (!box) return;
+              box.innerHTML = '<li class="p-6 text-center text-gray-500">Memuat log...</li>';
+              try {
+                  const res = await secureFetch('/activity-logs', 'GET');
+                  const rows = res.data || res || [];
+                  const list = Array.isArray(rows) ? rows : (rows.data || []);
+                  if (!list.length) {
+                      box.innerHTML = '<li class="p-6 text-center text-gray-500">Belum ada aktivitas.</li>';
+                      return;
+                  }
+                  box.innerHTML = list.map(log => `
+                      <li class="p-4">
+                          <p class="text-emerald-400 font-mono text-sm">${escapeHtml(log.action || '')}</p>
+                          <p class="text-gray-300 text-sm mt-1">${escapeHtml(log.description || '')}</p>
+                          <p class="text-xs text-gray-500 mt-1">${log.createdAt ? new Date(log.createdAt).toLocaleString('id-ID') : ''}</p>
+                      </li>`).join('');
+              } catch (err) {
+                  box.innerHTML = `<li class="p-6 text-center text-red-400">${escapeHtml(err.message || 'Gagal load log')}</li>`;
+              }
+          }
+          
+        async function handleLogout() {
+            try {
+                const rt = localStorage.getItem('refreshToken');
+            await fetch(`${BASE_URL}/auth/logout`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ refreshToken: rt })
+             });
+         } catch (_) {}
+         localStorage.removeItem('token');
+         localStorage.removeItem('refreshToken');
+         localStorage.removeItem('userInfo');
+         window.location.href = 'index.html';
+     }
         document.getElementById('btnLogout').addEventListener('click', handleLogout);
 
         async function renderApp() {
@@ -774,6 +941,7 @@
             document.getElementById('dashboardSection').classList.remove('hidden');
             switchTab('profile');
         }
+
         async function loadProfileUI() {
             if (!state.token) return;
             const p = parseJwtPayload(state.token);
@@ -816,10 +984,10 @@
 
         async function saveCustomName() {
             const name = document.getElementById('customNameInput').value.trim();
-            if (!name) return Swal.fire('Peringatan', 'Nama tidak boleh kosong.', 'warning');
+            if (!name) return Swal.fire(t('warn.title'), t('warn.nameEmpty'), 'warning');
             try {
                 await secureFetch('/auth/profile', 'PUT', { name });
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Nama disimpan', showConfirmButton: false, timer: 1500 });
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: t('name.saved'), showConfirmButton: false, timer: 1500 });
                 loadProfileUI();
             } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
         }
@@ -828,26 +996,26 @@
             const oldPassword = document.getElementById('oldPassword').value;
             const newPassword = document.getElementById('newPassword').value;
             const newPassword2 = document.getElementById('newPassword2').value;
-            if (!oldPassword || !newPassword) return Swal.fire('Peringatan', 'Isi password lama dan baru.', 'warning');
-            if (newPassword !== newPassword2) return Swal.fire('Peringatan', 'Password baru tidak sama.', 'warning');
-            if (newPassword.length < 6) return Swal.fire('Peringatan', 'Password baru minimal 6 karakter.', 'warning');
+            if (!oldPassword || !newPassword) return Swal.fire(t('warn.title'), t('warn.fillPass'), 'warning');
+            if (newPassword !== newPassword2) return Swal.fire(t('warn.title'), t('warn.passNotMatch'), 'warning');
+            if (newPassword.length < 6)  return Swal.fire(t('warn.title'), t('warn.passMin'), 'warning');
             try {
                 await secureFetch('/auth/change-password', 'PUT', { oldPassword, newPassword });
                 document.getElementById('oldPassword').value = '';
                 document.getElementById('newPassword').value = '';
                 document.getElementById('newPassword2').value = '';
-                Swal.fire('Berhasil', 'Password diubah.', 'success');
-            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+                Swal.fire(t('pass.changed'), t('pass.changedDesc'), 'success');
+            } catch (err) { Swal.fire(t('pass.failed'), err.message, 'error'); }
         }
 
         async function submitRecoveryEmail() {
             const recoveryEmail = document.getElementById('recoveryEmailInput').value.trim();
-            if (!recoveryEmail) return Swal.fire('Peringatan', 'Isi email pemulihan.', 'warning');
+            if (!recoveryEmail) return Swal.fire(t('warn.title'), t('warn.fillRecovery'), 'warning');
             try {
                 await secureFetch('/auth/recovery-email', 'POST', { recoveryEmail });
-                Swal.fire('OTP terkirim', 'Cek inbox email pemulihan.', 'success');
+                Swal.fire(t('otp.sent'), t('otp.sentDesc'), 'success');
                 loadProfileUI();
-            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+            } catch (err) { Swal.fire(t('pass.failed'), err.message, 'error'); }
         }
 
         async function submitRecoveryOtp() {
@@ -856,96 +1024,131 @@
             try {
                 await secureFetch('/auth/verify-recovery-otp', 'POST', { otp });
                 document.getElementById('recoveryOtpInput').value = '';
-                Swal.fire('Berhasil', 'Email pemulihan aktif.', 'success');
+                Swal.fire(t('otp.verified'), t('otp.verifiedDesc'), 'success')
                 loadProfileUI();
-            } catch (err) { Swal.fire('Gagal', err.message, 'error'); }
+            } catch (err) { Swal.fire(t('pass.failed'), err.message, 'error');}
         }
-        async function deleteAccount() {
-          const { isConfirmed } = await Swal.fire({
-              title: 'Hapus Akun?',
-              html: 'Semua data, catatan, dan sesi akan <strong>dihapus permanen</strong>. Tidak bisa dibatalkan!',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#ef4444',
-              cancelButtonColor: '#374151',
-              confirmButtonText: 'Ya, Hapus Akun Saya!',
-              cancelButtonText: 'Batal'
-          });
-          if (!isConfirmed) return;
+
+    async function deleteAccount() {
+        const { isConfirmed } = await Swal.fire({
+          title: t('delete.title'),
+          html: t('delete.desc'),
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#374151',
+          confirmButtonText: t('delete.confirm'),
+          cancelButtonText: t('delete.cancel')
+      });
       
-          const { value: password } = await Swal.fire({
-              title: 'Konfirmasi Password',
-              input: 'password',
-              inputPlaceholder: 'Masukkan password kamu',
-              showCancelButton: true,
-              confirmButtonColor: '#ef4444',
-              cancelButtonColor: '#374151',
-              confirmButtonText: 'Hapus Sekarang',
-              cancelButtonText: 'Batal',
-              inputValidator: v => !v ? 'Password wajib diisi!' : null
-          });
-          if (!password) return;
-      
-          try {
-              await secureFetch('/auth/delete-account', 'DELETE', { password });
-              localStorage.clear();
-              const db = await KeyStore.open();
-              await new Promise((res, rej) => {
-                  const tx = db.transaction(KeyStore.STORE_NAME, 'readwrite');
-                  tx.objectStore(KeyStore.STORE_NAME).clear();
-                  tx.oncomplete = () => res();
-                  tx.onerror = e => rej(e.target.error);
-              });
-              await Swal.fire({ icon: 'success', title: 'Akun Dihapus', text: 'Semua data kamu telah dihapus permanen.', timer: 2000, showConfirmButton: false });
-              window.location.href = 'index.html';
-          } catch (err) {
-              Swal.fire('Gagal', err.message || 'Gagal menghapus akun', 'error');
-          }
-}       function openSandbox() {
+      const { value: password } = await Swal.fire({
+          title: t('delete.passTitle'),
+          input: 'password',
+          inputPlaceholder: t('delete.passPlaceholder'),
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#374151',
+          confirmButtonText: t('delete.passConfirm'),
+          cancelButtonText: t('delete.cancel'),
+          inputValidator: v => !v ? t('delete.passRequired') : null
+      });
+         if (!password) return;
+     
+         try {
+             const timestamp = Date.now().toString();
+             const signature = await buildHmacSignature('DELETE', timestamp);
+     
+             const headers = {
+                 'Content-Type': 'application/json',
+                 'x-timestamp': timestamp,
+                 'Authorization': `Bearer ${state.token}`
+             };
+             if (signature) headers['x-signature'] = signature;
+             if (state.publicKeyB64) headers['x-client-public-key'] = state.publicKeyB64;
+     
+             const res = await fetch(`${BASE_URL}/auth/delete-account`, {
+                 method: 'DELETE',
+                 headers,
+                 body: JSON.stringify({ password })
+             });
+     
+             const data = await res.json();
+     
+             if (res.status === 401) {
+                return Swal.fire(t('delete.failedTitle'), data?.message || t('delete.wrongPass'), 'error');
+             }
+     
+             if (!res.ok) {
+                 throw new Error(data?.message || `Error ${res.status}`);
+             }
+     
+             localStorage.clear();
+             const db = await KeyStore.open();
+             await new Promise((res, rej) => {
+                 const tx = db.transaction(KeyStore.STORE_NAME, 'readwrite');
+                 tx.objectStore(KeyStore.STORE_NAME).clear();
+                 tx.oncomplete = () => res();
+                 tx.onerror = e => rej(e.target.error);
+             });
+     
+             await Swal.fire({
+              icon: 'success',
+              title: t('delete.successTitle'),
+              text: t('delete.successDesc'),
+              timer: 2000,
+              showConfirmButton: false
+});
+             window.location.href = 'index.html';
+     
+         } catch (err) {
+            Swal.fire(t('delete.failedTitle'), err.message || t('delete.failed'), 'error');
+         }
+}         
+
+function openSandbox() {
     Swal.fire({
         icon: 'warning',
-        title: '⚠️ Peringatan Sandbox!',
+        title: t('sandbox.title'),
         html: `
             <p style="color:#9ca3af;font-size:14px;margin-bottom:12px;">
-                Mode sandbox adalah <strong style="color:#fff">ruang uji publik</strong> — 
-                data yang kamu masukkan bisa dilihat oleh siapa saja.
+                ${t('sandbox.desc')}
             </p>
             <div style="background:#111827;border:1px solid #374151;border-radius:10px;padding:16px;text-align:left;margin-bottom:12px;">
-            <p style="color:#ef4444;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">🚫 DILARANG</p>
+            <p style="color:#ef4444;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">${t('sandbox.banned')}</p>
             <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
-                Masukkan password atau kredensial asli
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelBanned')}</span>
+                ${t('sandbox.ban1')}
             </p>
             <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
-                Masukkan data pribadi sensitif
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelBanned')}</span>
+                ${t('sandbox.ban2')}
             </p>
             <p style="color:#f87171;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">DILARANG</span>
-                Masukkan informasi rahasia apapun
+                <span style="background:#7f1d1d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelBanned')}</span>
+                ${t('sandbox.ban3')}
             </p>
         </div>
         <div style="background:#111827;border:1px solid #065f46;border-radius:10px;padding:16px;text-align:left;">
-            <p style="color:#34d399;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">ℹ️ INFO</p>
+            <p style="color:#34d399;font-size:15px;font-weight:bold;margin:0 0 10px 0;letter-spacing:1px;">${t('sandbox.info')}</p>
             <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
-                Gunakan hanya untuk uji coba API
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelInfo')}</span>
+                ${t('sandbox.info1')}
             </p>
             <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
-                Data sandbox bersifat dummy — tidak nyata, hanya untuk testing
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelInfo')}</span>
+                ${t('sandbox.info2')}
             </p>
             <p style="color:#34d399;font-size:13px;margin:6px 0;display:flex;align-items:center;gap:8px;">
-                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">INFO</span>
-                Mohon gunakan mode sandbox dengan bijak
+                <span style="background:#064e3b;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">${t('sandbox.labelInfo')}</span>
+                ${t('sandbox.info3')}
             </p>
         </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Ya, Saya Mengerti!',
+        confirmButtonText: t('sandbox.confirm'),
         confirmButtonColor: '#10b981',
         cancelButtonColor: '#374151',
-        cancelButtonText: 'Kembali',
+        cancelButtonText: t('sandbox.cancel'),
         background: '#1f2937',
         color: '#fff'
     }).then(result => {
@@ -954,6 +1157,7 @@
         }
     });
 }
+        initI18n();
         renderApp();
     </script>
 </body>
